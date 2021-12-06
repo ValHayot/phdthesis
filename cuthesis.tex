@@ -2,18 +2,37 @@
 \include{config}
 \include{constants}
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
 \include{pages/abstract}
 \include{pages/acknowledgements}
+\begin{prefacesection}{Contribution of Authors}
+\end{prefacesection}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Body of Thesis goes here.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %To inlcude new chapter add "\include{chapters/chapter-no/chapter-no.tex"
-\include{chapters/chapter1/chapter1}
-\include{chapters/chapter2/chapter2}
+\include{parts/part1/intro}
+\include{parts/part1/chapter1}
+\include{parts/part1/conclusion}
+
+\include{parts/part2/intro}
+\include{parts/part2/chapter1}
+\include{parts/part2/chapter2}
+\include{parts/part2/chapter3}
+\include{parts/part2/conclusion}
+
+\include{parts/part3/intro}
+\include{parts/part3/chapter1}
+\include{parts/part3/chapter2}
+\include{parts/part3/conclusion}
+
+\include{parts/part4/intro}
+\include{parts/part4/chapter1}
+\include{parts/part4/conclusion}
 
 %You can edit your citation style by changing the name in \bibliographystyle{plain} --> \bibliographystyle{new style name}
 \bibliographystyle{plain}

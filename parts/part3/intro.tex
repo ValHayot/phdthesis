@@ -1,0 +1,28 @@
+\part{Implementing Data Managment Tools for Neuroimaging pipelines}
+\chapter{Introduction}
+
+Neuroimaging pipelines processing large amounts of data may inevitably incur additional data management penalties.
+Use of existing Big Data software solutions require pipeline creators to entirely rewrite well-recognized neuroimaging
+tools in order to benefit from the built-in data management made available by these frameworks. Even if pipelines were to
+be entirely reimplemented, performance in HPC environments may still be hindered by the large resource requests. 
+While hardware solutions, such as Burst Buffers, exist to alleviate the impacts of data transfers and reduce burden on the
+parallel network-based file systems, users are left to perform the data management themselves. The following chapters focus on
+two different implementation of two tools that facilitate data management for neuroimaging pipelines. 
+
+Both implementations focus on the use of an on-the-fly burst buffer. In Chapter~\ref{chp:rp}, we discuss our implementation and evaluation
+of Rolling Prefetch, an extension to the S3Fs Python library that allows users to prefetch data during data processing. The implementation itself
+is solely focused on minimizing the costs of reads from accessing data located from S3 as the final output data is significantly smaller. We evaluate
+the performance improvement relative to the available strategies found in S3Fs. 
+
+Chapter~\ref{chp:seacs} discusses the implementation of Sea, a C/C++ data management library. The aim of Sea is to bring data management 
+strategies used in Big Data Frameworks, such as data locality and in-memory computing, to neuroimaging pipelines without requiring a rewrite
+of the applications. It uses the knowledge
+derived from Chapter~\ref{chp:rp} to implement prefetching, eviction and flushing for neuroimaging applications running on HPC.
+Furthermore, Sea automates within-workflow data management by redirecting application I/O calls to local caches, whenever applicable. 
+
+While neither of the aforementioned implementations exhibit any characteristics that limit them to be solely-used in neuroimaging,
+the are implemented in a way that keeps the neuroimaging context in mind. For instance, the solution is not to use Big Data Frameworks because
+neuroimaging tools would need to be rewritten. We avoid the use of Big Data filesystems, such as HDFS, as they are not realistic to HPC environments
+where access to compute nodes is restricted. Any pre-existing file system which requires root permissions to be installed is avoided as we
+want our tools to be user-installable. Furthermore, user-space file systems which can exhibit significant overheads, such as FUSE filesystems, are
+equally avoided as we do not want the overheads to outweight any possible benefits.

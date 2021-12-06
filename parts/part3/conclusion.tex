@@ -1,0 +1,18 @@
+\chapter{Conclusion}
+
+Our implementations significantly reduce processing time by masking data transfers within task computations.
+While they can be applied in all cases, they have been found to be most effective when data and computation are
+similar. Furthermore, we have not found either implementations to incur significant overheads.
+
+One of the most important characteristics of our implementations is that they do not disrupt the methods in which pipelines
+are currently built. Rolling Prefetch allows users to continue writing pipelines in Python as they would normally, maintaining
+even the interface for interacting with S3, by being an extension above S3FS. Sea satisfies that requirement by being a preloaded
+library that intercepts libc calls. Therefore, rather than adapt their code, users simply need to execute Sea alongside their pipeline.
+
+As more and more researchers are starting to interact with diverse types of infrastructures, such as both cloud and HCP,
+it will be important to extend Sea to include functionality to interact with cloud-based storage. It could also be done In
+such a way that enable existing pipelines making POSIX calls read from file systems such as 
+S3 without instrumentation.
+
+
+

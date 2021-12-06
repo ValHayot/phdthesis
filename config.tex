@@ -3,7 +3,33 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage{cuthesis}
-\usepackage{hyperref}
+
+% paper 1
+\usepackage[table]{xcolor}
+\usepackage[hyphens]{url}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{colortbl} % for \rowcolor
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[bookmarks=false]{hyperref}
+\usepackage{algorithm}
+\usepackage{algorithmicx} % Doc is at http://tug.ctan.org/macros/latex/contrib/algorithmicx/algorithmicx.pdf
+\usepackage{algpseudocode}
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=blue,filecolor=black,urlcolor=blue}
+\newcommand{\todo}[1]{\marginpar{\parbox{18mm}{\flushleft\tiny\color{red}\textbf{TODO}:
+      #1}}}
+\definecolor{headcolor}{gray}{0.9}
+\algblock{Input}{EndInput}
+\algnotext{EndInput}
+\algblock{Output}{EndOutput}
+\algnotext{EndOutput}
+\newcommand{\Desc}[2]{\State \makebox[2em][l]{#1}#2}
+
+%paper2
+\newcommand{\optane}{Intel Optane DCPMM}
 % Make hyperref colors nicer
 \hypersetup{colorlinks=true,linkcolor=black,citecolor=black,filecolor=black,urlcolor=blue}
 % Some example common packages used in computer science thesis

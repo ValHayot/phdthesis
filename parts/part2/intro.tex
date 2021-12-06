@@ -1,0 +1,32 @@
+\part{Evaluation of Big Data Solutions for Neuroimaging Data Processing}
+\chapter{Introduction}
+
+Use and implementation of Big Data Frameworks and strategies is limited in
+neuroimaging data processing pipelines. In Part~\ref{pt1} we discussed
+that important attributes to neuroimaging frameworks are centered on aspects
+such as ease of use, portability, reproducibility and parallelism. Runtime performance
+is entirely abstracted into the parallelism category in which CPU runtime is minimized
+by maximizing on CPU usage. Given that neuroimaging pipeline may now be running an unprecedented
+amount of data, runtime may be further minimized by reducing the costs associated with data
+transfers.
+
+In the following chapters, we investigate the applicability of existing data management
+solutions for the processing of neuroimaging data on HPC clusters. The research outlined
+in these chapters sought to determine the potential runtime performance
+improvement in the processing of large neuroimaging datasets using the solutions currently
+available. Should any performance improvement be detected, tools would need to be developed
+to help transition existing pipelines to leverage these solutions.
+
+Each chapter consists of a manuscript analyzing different axis of neuroimaging data processing
+using Big Data solutions. The three axes selected for our analyses include 1) speedups obtained
+from available software, 2) scheduling bottlenecks arising from large resource requests on HPC systems, and
+3) speedups obtained from hardware solutions. A simplified performance model is included in 
+each of the evaluations to aid in the quantification of the performance bounds.
+In Chapter~\ref{chp:bigdatastrategies},
+we investigate the potential speedups that can be obtained from using the Apache Spark
+framework on a Big neuroimaging dataset (the Big Brain). In Chapter~\ref{chp:spa}, 
+we analysed different overlay-scheduling strategies to determine if there was a 
+preferential strategy for scheduling Apache Spark applications on HPC. Chapter~\ref{chp:optane}
+then investigates the performance speedups related to the processing of the Big Brain using
+Intel DC Optane Persistant Memory and how it can work alongside or independently to Big Data
+Frameworks.  
