@@ -29,7 +29,37 @@
 \newcommand{\Desc}[2]{\State \makebox[2em][l]{#1}#2}
 
 %paper2
+\usepackage{ulem} % for \uwave
+\usepackage{hyperref}
+\usepackage{stmaryrd}
 \newcommand{\optane}{Intel Optane DCPMM}
+
+
+%paper3
+\usepackage{xspace}
+\usepackage[ruled,vlined,algo2e]{algorithm2e}
+\usepackage{amsmath}
+\usepackage[binary-units]{siunitx}
+\newcommand{\bigdata}{Big Data\xspace}
+\newcommand{\bigbrain}{BigBrain\xspace}
+
+%paper4
+\newcommand{\aws}{AWS\xspace}
+\newcommand{\hcp}{HCP\xspace}
+\newcommand{\sfs}{S3Fs\xspace} 
+
+%paper5
+%\usepackage{setspace}
+
+\makeatletter
+\newcommand{\setword}[2]{%
+  \phantomsection
+  #1\def\@currentlabel{\unexpanded{#1}}\label{#2}%
+}
+\makeatother
+\usepackage{longtable}
+\usepackage{multirow}
+
 % Make hyperref colors nicer
 \hypersetup{colorlinks=true,linkcolor=black,citecolor=black,filecolor=black,urlcolor=blue}
 % Some example common packages used in computer science thesis
