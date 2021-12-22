@@ -27,7 +27,7 @@
         such as Dask and Spark good contenders for the processing of neuroimaging Big Data.
         
          
-    \chapter{Introduction}
+    \section{Introduction}
         In recent years, the volume of neuroimaging data acquired has exceeded
         both the storage and computation capacity of a standard research 
         lab workstation. With the advancement of data sharing technologies, 
@@ -127,7 +127,7 @@
         \ref{reproducibility}.
         
 
-        \section{Big Neuroimaging Datasets}\label{datasets}
+        \subsection{Big Neuroimaging Datasets}\label{datasets}
 
             As a result of the rise in data sharing in neuroscience, 
             neuroimaging
@@ -261,7 +261,7 @@
             volume of higher-impact studies.
 
 
-        \section{Open-science Platforms}\label{platforms}
+        \subsection{Open-science Platforms}\label{platforms}
             Efficient processing of workflows is only but a small portion of 
             the Big Data issue in neuroscience. % nice transition, this section gives more context for your study
             Sharing and storing of datasets
@@ -302,7 +302,7 @@
             workflow engines must be adapted to efficiently execute on the 
             infrastructure made available.
             
-        \section{Infrastructure}\label{infrastructure}
+        \subsection{Infrastructure}\label{infrastructure}
             HPC infrastructure was initially designed for the processing of 
             compute-intensive applications. As a result,
             resource managers for these systems employ
@@ -378,7 +378,7 @@
             infrastructure available to researchers, a workflow framework good
             for neuroscience must be well adapted to handle these differences.
 
-    \chapter{Workflow composition}\label{workcomp}
+    \section{Workflow composition}\label{workcomp}
 
         Workflows, also known as pipelines, describe the flow of data from one 
         activity to another and are typically represented by a graph. Workflow activities, also referred to as 
@@ -417,7 +417,7 @@
         Section~\ref{mod} will look at how easy it is to integrate existing 
         tools into the workflows.
 
-        \section{Workflow language}\label{lang}
+        \subsection{Workflow language}\label{lang}
             The choice of workflow language (e.g. GUI, scripting language,
             programming language) greatly
             affects how easily it will get picked up by the community. Complex
@@ -526,7 +526,7 @@
             Spark also interfaces with R, another programming language commonly
             used in neuroimaging.
 
-            \section{Data structures}\label{ds}
+            \subsection{Data structures}\label{ds}
                 
                 Performance of workflow engines can be linked to the data structures
                 employed by the workflow. Scientific
@@ -586,7 +586,7 @@
                 matrices~\cite{BosaghZadeh:2016:MCO:2939672.2939675}.
 
 
-        \section{Tool interfaces}\label{mod}
+        \subsection{Tool interfaces}\label{mod}
             Often times, users will want to integrate existing tools into their 
             workflows. In order for workflows to communicate effectively with
             the tools, it is required that an interface be created. Workflow 
@@ -779,7 +779,7 @@
             communicate with the tools.
 
             
-    \chapter{Performance}\label{performance}
+    \section{Performance}\label{performance}
         Neuroimaging frameworks are notoriously known to be compute-intensive.
         The workflows and their respective tools needed to incorporate 
         parallelism in order to save on computing time. Maintaining good 
@@ -820,7 +820,7 @@
         Section~\ref{eval}.
         
  
-        \section{Data-centric optimizations}\label{fs}
+        \subsection{Data-centric optimizations}\label{fs}
             
             
             \todo{Although MapReduce, Spark and Dask are all data-intensive worflows,
@@ -848,8 +848,8 @@
             strategies.
         
 
-            \subsection{Strategies}
-                \subsubsection{In-memory computing}
+            \subsubsection{Strategies}
+                \paragraph{In-memory computing}
                     Random Access Memory (RAM) is the fastest memory available
                     to workflow engines. Big Data frameworks, such as Spark and 
                     Dask, leverage this feature by maintaining data in memory 
@@ -886,7 +886,7 @@
                     could otherwise incur performance penalties.
                                       
  
-                \subsubsection{Data locality}
+                \paragraph{Data locality}
                     Data locality, with respect to Big Data frameworks, is a
                     scheduling
                     strategy in which location of the data is known by the 
@@ -931,7 +931,7 @@
                     to data locality.
 
                     
-                \subsubsection{Lazy evaluation}
+                \paragraph{Lazy evaluation}
 
                     Lazy evaluation is a strategy used throughout programming languages
                     to improve performance of operations. Rather than
@@ -944,7 +944,7 @@
                     constructing graphs that result in the most optimal
                     task order of execution and further save on data transfers. 
 
-            \subsection{Big Data Filesystem optimizations for HPC}
+            \subsubsection{Big Data Filesystem optimizations for HPC}
 
                 Writting Big Data to Lustre is very costly compared to local 
                 node storage. Distributed filesystems found on HPC 
@@ -1007,7 +1007,7 @@
                 any performance improvements in systems without local storage 
                 may be negligable at best.   
             
-        \section{Big Data Scheduling}\label{sched}
+        \subsection{Big Data Scheduling}\label{sched}
             
             Scientific workflows typically rely on HPC schedulers for 
             distributed scheduling on clusters. These schedulers include 
@@ -1092,7 +1092,7 @@
             locality using a shared HDFS instance will remain an issue. 
          
 
-        \section{Checkpointing}\label{other}                                    
+        \subsection{Checkpointing}\label{other}                                    
                                                                                 
             Scientific workflow engines employ other strategies for improving   
             performance. As scientific worflows are compute intensive, it is    
@@ -1123,7 +1123,7 @@
             %\note{what about SPM, FastR??}                                      
 
                                                                                 
-        \section{Evaluation of Big Data Frameworks for Scientific Computing}\label{eval}     
+        \subsection{Evaluation of Big Data Frameworks for Scientific Computing}\label{eval}     
             The Big Data frameworks have sparked significant interest within the 
             scientific community, leading to research on the efficiency of      
             these frameworks for scientific computing. ~\cite{souza2017spark} found  
@@ -1152,7 +1152,7 @@
             found that Big Data Frameworks still required some adaptations to be
             effectively used as scientific workflow engines.            
             
-    \chapter{Portability}\label{portability}
+    \section{Portability}\label{portability}
         Platform-independence of both 
         the frameworks and tools, as well as, simple installation of all 
         necessary components and straightforward execution of workflows are a 
@@ -1165,7 +1165,7 @@
         3) execution setup. We also examine containerization, one of the 
         strategies used to improve portability.
 
-        \section{Platform-independence}
+        \subsection{Platform-independence}
             Achieving platform-independence allows users to use the workflow 
             engine in any available environment. This however does not imply 
             that the tools, and as a consequence, the pipelines created will
@@ -1196,7 +1196,7 @@
             is usually Linux-based and it is therefore crucial that all 
             workflows are compatible with and tested on Linux systems.
              
-       \section{Containers}
+       \subsection{Containers}
 
             Containers are lightweight solutions to isolating 
             environments. Although similar, containers and virtual machines 
@@ -1240,7 +1240,7 @@
             observed in fMRIPrep~\cite{Esteban306951}, a Nipype-based workflow for fMRI 
             preprocessing.
             
-       \section{Tool sharing}\label{sharing}
+       \subsection{Tool sharing}\label{sharing}
 
             Unless building a workflow exclusively based on custom
             functions or using a monolithic workflow engine such as SPM, users
@@ -1284,7 +1284,7 @@
             a UDF. Conversly, libraries that manage execution of containerized 
             tools, such as Boutiques, can be intergrated into these engines.
 
-    \chapter{Reproducibility}\label{reproducibility}
+    \section{Reproducibility}\label{reproducibility}
         Reproducibility is a critical component to all scientific workflows.
         It ensures that results reported are valid through repeated testing. 
         Without reproducibility, correctness of results could never be 
@@ -1332,7 +1332,7 @@
         engines assimilate and distribute the provenance data. 
         Section~\ref{repcont} will examine how these engines use containers to
         facilitate reproducibility of the experiments.
-        \section{Provenance Formats}\label{metadata}
+        \subsection{Provenance Formats}\label{metadata}
             In order to improve data sharing in 
             neuroscience, the derived data's provenance must be well understood
             by the community. Even if the provenance tracking is comprehensive,
@@ -1346,7 +1346,7 @@
             popular neuroimaging metadata specifications, Brain Imaging Data Structure (BIDS); 
             and data lineage, the Big Data solution to provenance tracking.
 
-            \subsection{W3C PROV}
+            \subsubsection{W3C PROV}
             The W3C PROV specification came out from the need to explain the 
             origin of data shared on the Web. 
             The aim of the W3 PROV specification was to gather information on
@@ -1363,7 +1363,7 @@
             activity taking place. Agents can be individuals, companies and 
             software, amongst others.
             
-            \subsection{NIDM-Results}
+            \subsubsection{NIDM-Results}
                 NIDM-results was designed to improve the limited XML-based 
                 Clinical and Experimental Data Exchange (XCEDE) neuroimaging
                 provenance metadata format~\cite{Maumet:2016aa}. It is a domain-specific extension
@@ -1378,7 +1378,7 @@
                 %very powerful but difficult to use: performance sucks, queries are hell to write, 
                 %and format is not human-readable.}
 
-            \subsection{BIDS Derivatives}
+            \subsubsection{BIDS Derivatives}
                 The BIDS-Derivatives metadata specification is the newest 
                 addition to the BIDS family of neuroimaging-related 
                 specifications. It is the sister
@@ -1393,7 +1393,7 @@
                 This is primarily a result of its simplicity, as seen in its 
                 sister-project BIDS Raw, a widely-adopted community-driven effort.
             
-            \subsection{Data Lineage}
+            \subsubsection{Data Lineage}
                 Data lineage is primarily used by Big Data Frameworks such as 
                 Spark and Dask to avoid storing large amounts data to disk for
                 fault tolerance, however, it is also an effective way to capture
@@ -1402,7 +1402,7 @@
                 which data to produce results, that allows data to be recomputed 
                 in case of loss. 
 
-        \section{Provenance Tracking}\label{prov}
+        \subsection{Provenance Tracking}\label{prov}
 
             To address the importance of provenance tracking for scientific 
             workflows several workflow engines adapted strategies to capture 
@@ -1520,7 +1520,7 @@
             of them lack the ability to provide provenance capture of external
             tools at present.
 
-        \section{Containerization}\label{repcont}
+        \subsection{Containerization}\label{repcont}
 
             To handle issues with numerical instability of tools and relieve 
             users from
@@ -1550,7 +1550,7 @@
             versions and further limit scientific advancement.
     
     
-    \chapter{Discussion}
+    \section{Discussion}
     
         While mainy neuroimaging workflow engines exist, none of them are well
         suited for the processing of neuroimaging Big Data due to lack of data-centric optimizations. Even more general

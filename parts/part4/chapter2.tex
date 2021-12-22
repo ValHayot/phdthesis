@@ -12,18 +12,19 @@ In preparation: \\
 	datasets provide researchers with new insights into the human brain across diverse populations. Difficulties with
 	managing such large data has partially hindered the advancement of scientific studies analyzing these datasets. Many
 	software tools and strategies have emerged to facilitate the processing. Many open datasets have been stored on cloud storage
-	services, such as AWS, enabling rapid transfer of the data at a cost. Software tools such as Datalad has facilitated both the
+	services, such as AWS, enabling rapid transfer of the data at a cost\todo{What cost?}. Software tools such as Datalad has facilitated both the
 	sharing and versioning of data. Despite these advancements in-analysis data-management remains limited in neuroimaging workflows.
     
 	Neuroimaging workflows, particularly preprocessing ones, may lead to a magnification in output sizes due to <add reason>. They also produce
 	significant amounts of intermediary data due to being composed of a multitude of steps. 
-    
+    \todo{this sounds a lot like an intro that teasing about general context, not an abstract that summarize the chapter}
+
     \section{Introduction}\label{sec:sea_neuro:introduction}
     
     Neuroimaging datasets continue to grow in size resulting in new challenges related
     to data management. The current largest neuroimaging datasets, such as the Human Connectome Project (HCP)~\cite{HCP}
     and the UK Biobank~\cite{ukbiobank} reach up to Petabytes of data. Big Data in neuroimaging can be present in two formats: 1)
-    very large files, such as those found in the BigBrain~\cite{bigbrain}, and 2) large datasets made up of very small files,
+    very large files, such as those found in the BigBrain~\cite{bigbrain}, and 2)\todo{what is that 2?} large datasets made up of very small files,
     such as those typically found in fMRI datasets. 
     
     When processing, large datasets can result in longer processing times even when compute resources are ample.
@@ -88,7 +89,7 @@ In preparation: \\
     possible. Similarly, when intercepting read calls, Sea can choose to read from a faster device if a copy is available on that device.
     Sea decides which storage location it can write to based on the detailed provided in an initialization file called \texttt{sea.ini}. 
     This file informs Sea of which locations it can use to read and write to, and well as their order of priority. An example of the initialization
-    file can be seen in ~\ref{seaini}.
+    file can be seen in ~\ref{seaini}\todo{Figure table,link?}.
     
     As neuroimaging pipeline results are typically required post-processing and HPC compute-local resources are only accessible during the
     reserved duration, Sea provides functionality to flush and evict data to persistent shared storage. This is accomplished via a separate
@@ -96,7 +97,7 @@ In preparation: \\
     interrupting on going processing with data management operations.
     Users must inform Sea of files that need to be
     persisted to storage within a file called \texttt{.sea\_flushlist}, and temporary files which can be removed from cache within a file
-    called the \texttt{.sea\_evictlist}. Both these files can be populated using regular expressions to denote the paths to flush and evict.
+    called the \texttt{.sea\_evictlist}\todo{I would have used .config/sea/evictlist, as user it is better to handle.}. Both these files can be populated using regular expressions to denote the paths to flush and evict.
     If a file occurs in both the \texttt{.sea\_flushlist} and \texttt{.sea\_evictlist}, Sea will interpret this as a \texttt{move} operation
     and simply move the file from local to persistent storage rather than copying it. Files that will be reused by the application should only
     be flushed rather than flushed and evicted, as files can benefit from speedups related to reading from fast rather than slow storage.
@@ -109,10 +110,10 @@ In preparation: \\
     mirrors the file structure of each storage location across all storage locations. That means, it is generally advisable to provide
     empty storage locations for Sea to write to as the mirroring of large directories can take some time. When prefetching, it is
     best to provide Sea with a path that only points to that data the requires prefetching as mirroring the paths of full datasets may 
-    extend processing time.
+    extend processing time.\todo{maybe move that earlier. Overall, this paragraph is not clear. Does sea copies everything from all its mounted point?}
     
-    Sea can easily be launched directly using the available containers on the GitHub registry, or can be compiled via source using Make.
-    It requires a version of glibc greater than X. Once compiled, Sea can be executed using the `sea-app.sh' binary.
+    Sea can easily be launched\todo{launched or tested?} directly using the available containers on the GitHub registry, or can be compiled via source using Make.
+    It requires a version of glibc greater than X\todo{what is X? 10?}. Once compiled, Sea can be executed using the `sea-app.sh' binary\todo{that doesnt look like an LDPRELOAD. Also, you can give a link to Sea's readme.}.
     
     \subsection{Performance analysis of Sea for neuroimaging}
     
@@ -139,7 +140,7 @@ In preparation: \\
     At the time of the experiments, the dataset contained 255.0~$GB$ (53061 files) originating from the 308 subjects available on DataLad~\cite{}.
     
     The HCP project, whose aim is to characterize brain connectivity using data collected from 1200 subjects, is the largest of the three datasets.
-    At the time of our experimments, the dataset obtained consisted 85.4~$TB$ (x files) of data collected from 1113 subjects.
+    At the time of our experimments, the dataset obtained consisted 85.4~$TB$ (x files\todo{what is x? 10?}) of data collected from 1113 subjects.
     
     By experimenting with datasets of different spatial and temporal resolutions, the amount of compute may be affected.
     Naturally, with more data there may inevitably be more computations performed, but also, the code itself may
@@ -149,7 +150,7 @@ In preparation: \\
     
     \begin{table*}[t]
       \small\centering
-    \begin{tabular}{|c c c c c|}
+    \resizebox{\textwidth}{!}{\begin{tabular}{|c c c c c|}
       \hline
       Dataset & Total Size (MB) & Total Number of images & Number of images processed & Total size of processed (MB) \\
       \hline
@@ -169,7 +170,7 @@ In preparation: \\
       \hline
     
       \hline
-    \end{tabular}\caption{Dataset characteristics}\label{table:data}
+    \end{tabular}}\caption{Dataset characteristics}\label{table:data}
     \end{table*}
     
     %just for example run
@@ -189,7 +190,7 @@ In preparation: \\
     Similarly to datasets, preprocessing pipelines can also vary in duration as a result of methodological differences.
     Thus, we preprocessed each dataset using four standard preprocessing pipelines: FSL~\cite{fsl}, AFNI~\cite{AFNI},
     SPM~\cite{spm}, fMRIPrep~\cite{fmriprep}. Table~\ref{table:pipelines} provides an reference of the differences in computation and data-intensivity
-    of the different pipelines on a single subject of all three of the datasets.
+    of the different pipelines on a single subject of all three of the datasets \todo{this sentence is complicated, but i forgot why}.
     
     Each tool was set to only run the preprocessing pipeline. Scripts used to execute each pipeline can be found at~\ref{github.com/valhayot/sea-slurm-scripts}.
     
@@ -206,15 +207,15 @@ In preparation: \\
     and brain masking. While AFNI does have some parallelized components that can be controlled via environment variables, we chose to let 
     the pipeline use as much parallelism as required for its execution.
     
-    We set fMRIPrep to run with \texttt{--fs-no-reconall} flag set and set the \texttt{--bids-database-dir} to a tmpfs location. 
+    We set fMRIPrep to run with \texttt{--fs-no-reconall} flag set and set the \texttt{--bids\-database-dir} to a tmpfs location. 
     Furthermore, the seeds were fixed to ensure reproducible results. Unlike the other tools where only a single fMRI image was preprocessed
     per process, it was not possible to do so with fMRIPrep. Thus, fMRIPrep preprocessed entire subject directories at a time
-    
+
     %%{provide subject #/session#} of the ds001545 dataset.
     
     \begin{table*}[t]
       \small\centering
-    \begin{tabular}{|c c c c c c|}
+      \resizebox{\textwidth}{!}{\begin{tabular}{|c c c c c c|}
       \hline
       Tool & Dataset &  Output Size (MB) & Total libc calls & Libc Lustre calls & Compute time (s) \\
       \hline
@@ -231,7 +232,7 @@ In preparation: \\
       & HCP & 2082.5 & 54753 & 25226 & 715.43 \\
     
       \hline
-    \end{tabular}\caption{Pipeline execution characteristics}\label{table:pipelines}
+    \end{tabular}}\caption{Pipeline execution characteristics}\label{table:pipelines}
     \end{table*}
     \subsection{Controls}
     Our objective is to measure the speedup brought by Sea on real neuroimaging pipelines.
@@ -257,27 +258,172 @@ In preparation: \\
     storage nodes were connected to the compute nodes via a 20Gbps ethernet connection.
     The cluster's hardware is similar to that of Beluga.
     
-    The Beluga cluster
+    The Beluga cluster consists of a total of 977 compute nodes, of which we used their general compute nodes with 186~$GiB$ of available
+    memory, 480~$GiB$ of scratch SSD space, 2 Intel Gold 6148 Skylake @ 2.4 GHz CPUs and Centos 7 installed. Each compute node is connected
+    to the Lustre scratch filesystem via an Mellanox Infiniband EDR (100 Gb/s) network interconnect. The scratch filesystem consists of a total 2.6~$PiB$
+    of space, with 38 OSTs of 69.8~$TiB$ each and two MDTs of 3.3~$TiB$.
+    \todo{normalize si formatting everywhere}
+
+    In our controlled local cluster, we ran the experiments with and without lustre deteriation, which we refer to as busy writers. Without
+    busy writers, the neuroimaging pipelines have exclusive access to the cluster. With busy writers, the neuroimaging pipelines are executed alongside
+    a Spark application that reads and writes approximately 1000 617MB blocks using 64 threads multiple times (until the neuroimaging applications completes),
+    with a 5 seconds sleep between reads and writes. In our experiments, we either had 6 nodes each executing the Spark application or no busy writers.
+
+    To ensure that system performance was equivalent between Sea and baseline, we executed Sea and baseline pipelines together, for all experiments.
     
     %Busy writers
     \section{Results}
+
+
+\begin{figure*}
+
+\begin{subfigure}{\textwidth}
+    \centering
+    \captionsetup{width=.85\linewidth}
+    \includegraphics[width=\columnwidth]{figures/sea-neuro/slashbin_results.pdf}%
+    \caption{Complete results}\label{fig:seaneuro:slashbinfull}
+\end{subfigure}
+\begin{subfigure}{\textwidth}
+    \centering
+    \captionsetup{width=.85\linewidth}
+    \includegraphics[width=\linewidth]{figures/sea-neuro/slashbin_results_zoomed.pdf}
+    \caption{Zoomed between 0 and 5000 seconds}\label{fig:seaneuro:slashbinzoom}
+\end{subfigure}
+\caption{Makespan comparison between Sea and Baseline on controlled local cluster}
+\label{fig:seaneuro:slashbin}
+\end{figure*}
+
+In Figure~\ref{fig:seaneuro:slashbin}, we see that although baseline's makespan increases with the presence of busy writers,
+Sea's makespan remains relatively stable respective to the dataset and pipeline used. AFNI is has a significantly shorter makespan
+than SPM, regardless of the presence of busy writers and dataset type. However, makespan in AFNI is naturally influenced by the presence of both.
+
+For both pipelines, PREVENT-AD has the shortest makespan, with parallelism being a determining factor for speedup. For instance, if we look
+at \ref{fig:seaneuro:slashbinzoom}, when using a single process, Sea appears to be consistently faster than baseline for both pipelines.
+When we increase the level of parallelism to 8 pipeline processes, whereas Sea is still consistently faster than baseline for AFNI, this
+is no longer true for SPM. Interestingly enough, baseline appears to outperform itself with 6 busy writers at 8 parallel processes, whereas
+this is not the case at 16 parallel processes. At 16 parallel processes, Sea and Baseline perform almost identically for both SPM and AFNI.
+
+In the case of ds001545, the next smallest dataset, Sea is faster than baseline with SPM for all parallel conditions, with a maximum speedup of 25.8~X~\todo{verify that there was no failure here as average is 3x} at 1 image.
+Average speedup was found to be 4~X and 2~x for 8 and 16 threads, respectively. A possible reason for diminishing speedup with increased number of 
+threads is that each process may be competing for compute resources as we did not restrict the number of parallel threads.
+AFNI, on the other hand, experiences a speedup with Sea at 1 (1.7~X) parallel processes, but a slight slowdown (0.96~X) at 8 parallel processes.
+At 16 parallel processes, Sea and Baseline perform similarly. A possible explanation for the slowdown at 8 processes may be related to a memory bottleneck. That is, with the increase in data occupying memory space and additional memory required by the processes, there may be additional data transfers occuring at the CPU-level as a result of initial data placement.
+
+Similarly, HCP, the largest dataset, experienced greater speedups with SPM than with AFNI. Average speedups with
+SPM were found to be 6.8~X, 2.7~X and 1.8~X, for 1, 8 and 16 parallel processes, respectively. Speedups with AFNI
+were found to be 1.2~X, 2.3~X and 1.6~x at 1, 8 and 16 parallel processes. Unlike with ds001545, AFNI does not experience a slowdown with Sea at 8 parallel processes, possibly due to page cache being overloaded with baseline as a result of the data size and frequency of the writes.
+
+
+
+\begin{figure*}
+
+\begin{subfigure}{\textwidth}
+    \centering
+    \captionsetup{width=.85\linewidth}
+    \includegraphics[width=\columnwidth]{figures/sea-neuro/beluga_sea_all.pdf}%
+    \caption{Complete results}\label{fig:seaneuro:belugafull}
+\end{subfigure}
+\begin{subfigure}{\textwidth}
+    \centering
+    \captionsetup{width=.85\linewidth}
+    \includegraphics[width=\linewidth]{figures/sea-neuro/beluga_sea_zoom.pdf}
+    \caption{Zoomed between 0 and 2000 seconds}\label{fig:seaneuro:belugazoom}
+\end{subfigure}
+\caption{Makespan comparison between Sea and Baseline on Beluga}
+\label{fig:seaneuro:beluga}
+\end{figure*}
+
+The Beluga results (Figure~\ref{fig:seaneuro:beluga}), 
+shows that Sea and Baseline generally performed 
+similarly, but that occassionally, we can obtain large 
+speedups with Sea, presumably when Lustre is 
+overburdened. The largest speedup obtained by the use of
+Sea is 3.2~X which occurred when running SPM on ds001545 with 8 parallel processes. The greatest
+slowdown experienced from using Sea was found to be 0.7~X, which occurred when running SPM on ds001545 with a single process. 
+
     
     
     \section{Discussion}
     \subsection{Significance of speedups with Sea}
+
+    Our results show that the speedups obtained from
+    using Sea can be quite substantial (up to 25.8~X)
+    depending on the deterioration of the Lustre
+    filesystem. On a production cluster where Lustre I/O could not be controlled, we obtained a maximum speedup of 3.2~X.
+
+    While in the average case, Sea and Baseline performed similarly, it is impossible for the
+    average cluster user to know if Lustre's performance
+    will be deteriorated during the lifetime of their
+    application execution. The fact that Sea and Baseline perform similarly in the average case is indicator that runtime is generally not
+    deteriorated by Sea and is safe to use in the event where Lustre performance is sufficiently deteriorated.
+
+    Although Sea did result in performance deterioration at times, the magnitude of deterioration is significantly less than that of possible speedups obtained. Our controlled experiments demonstrate that using Sea with a deteriorated Lustre filesystem can result in average speedups of up to 2.6~X. Such results indicate that the risk of a slowdown with Sea are less important that the potential speedups that can arise.
+
+    \subsection{Limitations of using Sea}
     
-    \subsection{Other use cases}
-    writes a lot but it's actually more complicated. When dataset increases
+    Sea really shines when it is executed on a data intensive pipeline.
+    This means, the data is written at a rate which exceeds the rate at
+    which the compute node's page cache can flush results to Lustre. In
+    our experiments, the pipeline which consisted of both the shortest
+    duration and largest output size was AFNI processing HCP with 16 subjects.
+    While it wrote approximately 100~$GB$ of data, the controlled cluster would
+    have had approximately 44~$GB$ of dirty cache available per OST and a maximum
+    amount of 100~$GB$ of page cache. Since all writes would not have occurred at the same time
+    and computation time was extended as a result of CPU contention, even our controlled experiments
+    do not showcase the benefits of Sea in a highly data intensive scenario. However, HCP is one of the largest fMRI datasets, thus the only way to augment data intensitivity of the applications is through increased parallelism which is limited by the number of available cores. As a result, we can
+    only demonstrate the speedups brought by Sea when Lustre performance has been deteriorated.
+
+
+    Sea may not be ideal in instances where there is a memory bottleneck, for instance, as speculated
+    with AFNI and ds0015454 using 8 parallel processes on our local cluster. In these experiments, Sea wrote the majority of the results to tmpfs space.
+    Since the applications also require a substantial amount of memory space,
+    this may have resulted in increased CPU communication. In these cases, it
+    is likely preferred to reduce the amount of tmpfs space used by Sea and
+    favour writing to disk instead. However, in instances where Lustre
+    performance is quite good, we would expect a performance degradation from
+    using disk.
+
+
+    %\subsection{Sea uses more memory}
+    %\subsection{Other use cases}
+    %writes a lot but it's actually more complicated. When dataset increases
     \subsection{Predicting speedups}
-     difficulties with summarizing speedups into guidelines.
-     variability is important and it's coming from the interaction between infrastructure and application.
-     Benefits of sea depend on parameters such as load of the filesystem which is multifold and the application compute and
-     file system configuration. 
-     page cache
-     examples:
-      - large dataset - > more computation
-      - data access patterns and bursty-ness
-      - small datasets + metadata accesses
+
+    Our results expose the complexities of performance predictions on a production cluster. We present results on a local cluster with which we
+    have control over the global cluster usage and are able to demonstrate that
+    significant speedups can be obtained when all the disks associated to Lustre
+    are busy writing other data concurrently. However, even these experiments
+    are limited in demonstrating potential speedups with Sea as there are many
+    controlled variables, some of which may vary from cluster to cluster. For
+    example, Beluga has a total of 977 nodes and only 38 disks associated with
+    their Lustre scratch file system. We can imagine that if 900 of the nodes
+    are busy writing to the scratch file system, we would observe a speedup
+    larger than what has been reported on our local cluster with only 8 compute
+    nodes and 44 disks associated to Lustre. However, these are not the only
+    factors that can affect reported results, others can include when the
+    experiment were executed, what kind of applications were being executed
+    alongside the experiment, scratch filesystem usage during experiments, 
+    what were the application write patterns, etc.
+
+    As a user, we cannot control or predict the cluster status at the time of
+    our experiments. However, we can control how our applications behave. The
+    experiments show that when parallelism is optimal (no competing threads and
+    minimized compute time), we obtain speedups with Sea if Lustre performance
+    is deteriorated. Otherwise, we should experience the same performance as 
+    without Sea. The more data we write, the bigger the speedups, since whatever
+    can be written to page cache effectively behaves similarly as using Sea to write
+    to tmpfs. This, naturally, comes with the caveat that using too much memory with
+    Sea can result in a slowdown if page cache can be used. Additionally, the more  
+
+    %  difficulties with summarizing speedups into guidelines.
+    %  variability is important and it's coming from the interaction between infrastructure and application.
+    %  Benefits of sea depend on parameters such as load of the filesystem which is multifold and the application compute and
+    %  file system configuration. 
+    %  page cache
+    %  examples:
+    %   - large dataset - > more computation
+    %   - data access patterns and bursty-ness
+    %   - small datasets + metadata accesses
     
     \subsection{Libc interception of neuroimaging pipelines}
     
@@ -303,7 +449,6 @@ In preparation: \\
     
     
     \subsection{Effective use of available cluster resources}
-    \subsection{Prefetching, flushing and eviction with Sea}
     \subsection{Comparisons to best case scenario}
     
     talk about testing
