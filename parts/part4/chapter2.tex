@@ -447,11 +447,20 @@ slowdown experienced from using Sea was found to be 0.7~X, which occurred when r
     in cases with very large input files, it may be preferable to maintain the memory map
     to Lustre.
 
-    Whereas flushing and eviction were not used in the controlled experiments, they were
-    leveraged for the Beluga experiments. We made the assumption in this case that users would
-    want access to all available intermediate data, but this would likely not be the case
-    with the processing of full datasets. Thus eviction was mostly used to ensure that files
-    eventually deleted by the pipelines would not be copied to Lustre.  
+    Whereas flushing and eviction were not used in the controlled experiments,
+    they were leveraged for the Beluga experiments. We made the assumption, in
+    this case, that users would want access to all available intermediate data,
+    but this would likely not be the case with the processing of full datasets.
+    Thus eviction was mostly used to ensure that files eventually deleted by the
+    pipelines would not be copied to Lustre. Since all intermediate files were
+    copied Lustre by Sea in our Beluga experiments, it is normal that speedups
+    occurred less frequently and not at the same magnitude. Additionally, slowdowns
+    experienced with Sea may be a result of flushing occurring outside of the computation.
+    We assume that in large scale analyses, users will not need access to all intermediate
+    results, leading to better usage of tmpfs and also minimized writes to Lustre. Such a
+    scenario should lead to performance results more akin to those obtained using Big Data
+    frameworks.
+
     \subsection{Libc interception of neuroimaging pipelines}
     
     As demonstrated by our Sea experiments, we have found that libc interception
