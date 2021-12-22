@@ -389,8 +389,9 @@ slowdown experienced from using Sea was found to be 0.7~X, which occurred when r
     %writes a lot but it's actually more complicated. When dataset increases
     \subsection{Predicting speedups}
 
-    Our results expose the complexities of performance predictions on a production cluster. We present results on a local cluster with which we
-    have control over the global cluster usage and are able to demonstrate that
+    Our results expose the complexities of performance predictions on a
+    production cluster. We present results on a local cluster with which we have
+    control over the global cluster usage and are able to demonstrate that
     significant speedups can be obtained when all the disks associated to Lustre
     are busy writing other data concurrently. However, even these experiments
     are limited in demonstrating potential speedups with Sea as there are many
@@ -402,8 +403,8 @@ slowdown experienced from using Sea was found to be 0.7~X, which occurred when r
     nodes and 44 disks associated to Lustre. However, these are not the only
     factors that can affect reported results, others can include when the
     experiment were executed, what kind of applications were being executed
-    alongside the experiment, scratch filesystem usage during experiments, 
-    what were the application write patterns, etc.
+    alongside the experiment, scratch filesystem usage during experiments, what
+    were the application write patterns, etc.
 
     As a user, we cannot control or predict the cluster status at the time of
     our experiments. However, we can control how our applications behave. The
@@ -413,7 +414,16 @@ slowdown experienced from using Sea was found to be 0.7~X, which occurred when r
     without Sea. The more data we write, the bigger the speedups, since whatever
     can be written to page cache effectively behaves similarly as using Sea to write
     to tmpfs. This, naturally, comes with the caveat that using too much memory with
-    Sea can result in a slowdown if page cache can be used. Additionally, the more  
+    Sea can result in a slowdown if page cache can be used.
+    
+    Additionally, the frequency and the size of the user application I/O also
+    plays an important role in determining speedups. An application which writes
+    a lot of data, but the writes are spread out evenly, may result in no
+    speedups from using Sea, whereas an application which writes large amounts
+    of data in bursts may benefit from significant speedups. Furthermore,
+    applications which create many small files may also experience larger
+    speedups with Sea as the these small files may overburden the Lustre
+    metadata server.
 
     %  difficulties with summarizing speedups into guidelines.
     %  variability is important and it's coming from the interaction between infrastructure and application.
@@ -425,15 +435,35 @@ slowdown experienced from using Sea was found to be 0.7~X, which occurred when r
     %   - data access patterns and bursty-ness
     %   - small datasets + metadata accesses
     
+    \subsection{Prefetching, flushing and eviction with Sea}
+
+    Sea provides prefetching, flushing and eviction mechanisms to further improve
+    the speedups that can be obtained with Sea. Prefetching allows input data to be moved
+    to and manipulated from memory. All of our experiments with SPM used prefetching as
+    SPM updates the input data via the use of a memory map. Without prefetching, updates
+    to the input files would have been performed directly on Lustre. Thus exhibiting a
+    less important speedup. It was favorable to proceed with prefetching, in this case,
+    as the input files themselves were not large compared to available memory space, but
+    in cases with very large input files, it may be preferable to maintain the memory map
+    to Lustre.
+
+    Whereas flushing and eviction were not used in the controlled experiments, they were
+    leveraged for the Beluga experiments. We made the assumption in this case that users would
+    want access to all available intermediate data, but this would likely not be the case
+    with the processing of full datasets. Thus eviction was mostly used to ensure that files
+    eventually deleted by the pipelines would not be copied to Lustre.  
     \subsection{Libc interception of neuroimaging pipelines}
     
-    As demonstrated by our Sea experiments, we have found that libc interception is effective at capturing all file system
-    calls executed by the applications. This means that Sea is compatible with the most prominently used neuroimaging
-    preprocessing pipelines. Although we have not extensively against all possible parameters and toolbox applications, we
-    assume that use of glibc within the toolboxes themselves are likely to be consistent.
+    As demonstrated by our Sea experiments, we have found that libc interception
+    is effective at capturing all file system calls executed by the
+    applications. This means that Sea is compatible with some of the  most prominently
+    used neuroimaging preprocessing pipelines. Although we have not extensively
+    against all possible parameters and toolbox applications, we assume that use
+    of glibc within the toolboxes themselves are likely to be consistent.
     
-    The ability to use libc interception over more common alternative methods such as kernel-based or fuse-based filesystems
-    was essential in ensuring ease-of-use and minimal performance overheads. 
+    The ability to use libc interception over more common alternative methods
+    such as kernel-based or fuse-based filesystems was essential in ensuring
+    ease-of-use and minimal performance overheads. 
     
     opportunities for other optimizations
     
