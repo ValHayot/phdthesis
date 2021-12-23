@@ -311,7 +311,7 @@ At 16 parallel processes, Sea and Baseline perform similarly. A possible explana
 
 Similarly, HCP, the largest dataset, experienced greater speedups with SPM than with AFNI. Average speedups with
 SPM were found to be 6.8~X, 2.7~X and 1.8~X, for 1, 8 and 16 parallel processes, respectively. Speedups with AFNI
-were found to be 1.2~X, 2.3~X and 1.6~x at 1, 8 and 16 parallel processes. Unlike with ds001545, AFNI does not experience a slowdown with Sea at 8 parallel processes, possibly due to page cache being overloaded with baseline as a result of the data size and frequency of the writes.
+were found to be 1.2~$\times$, 2.3~$\times$ and 1.6~$\times$ at 1, 8 and 16 parallel processes. Unlike with ds001545, AFNI does not experience a slowdown with Sea at 8 parallel processes, possibly due to page cache being overloaded with baseline as a result of the data size and frequency of the writes.
 
 
 
@@ -338,8 +338,8 @@ shows that Sea and Baseline generally performed
 similarly, but that occassionally, we can obtain large 
 speedups with Sea, presumably when Lustre is 
 overburdened. The largest speedup obtained by the use of
-Sea is 3.2~X which occurred when running SPM on ds001545 with 8 parallel processes. The greatest
-slowdown experienced from using Sea was found to be 0.7~X, which occurred when running SPM on ds001545 with a single process. 
+Sea is 3.2~$\times$ which occurred when running SPM on ds001545 with 8 parallel processes. The greatest
+slowdown experienced from using Sea was found to be 0.7~$\times$, which occurred when running SPM on ds001545 with a single process. 
 
     
     
@@ -465,33 +465,46 @@ slowdown experienced from using Sea was found to be 0.7~X, which occurred when r
     
     As demonstrated by our Sea experiments, we have found that libc interception
     is effective at capturing all file system calls executed by the
-    applications. This means that Sea is compatible with some of the  most prominently
-    used neuroimaging preprocessing pipelines. Although we have not extensively
+    applications. This means that Sea is compatible with some of the most prominently
+    used neuroimaging preprocessing pipelines. Although we have not tested it extensively
     against all possible parameters and toolbox applications, we assume that use
     of glibc within the toolboxes themselves are likely to be consistent.
     
     The ability to use libc interception over more common alternative methods
     such as kernel-based or fuse-based filesystems was essential in ensuring
-    ease-of-use and minimal performance overheads. 
+    ease-of-use and minimal performance overheads. As both our controlled and production
+    environment experiments demonstrate, Sea's overhead is minimal and the magnitude of the
+    speedups to be gained by the use of Sea is significantly greater than the magnitude of the
+    slowdowns.
     
-    opportunities for other optimizations
+    %opportunities for other optimizations
+    % Sea may be beneficial
+    \subsection{Should Sea always be used ?}
     
-    Sea may be beneficial
-    \subsection{Should Sea always be used?}
+    Our results show that performance with Sea is generally hard to predict as users do not have control
+    over the variables outside of the application they are executing. We have previously discussed the
+    conditions in which Sea may not be favourable to use, however, differences in the execution environment
+    can still shift performance results to be favourable to Sea. As we cannot guarantee performance with
+    Sea, we break down this discussion from the perspective of a cluster administrator and that of a user.
+
+    From the perspective of a cluster administrator, Sea is considered useful to maintaining the global health of the system By using available local resources, Sea is able to alleviate strain on
+    globally shared cluster resources, thus improving the experience for all users. Sea is able to do this
+    through the use of eviction which ensures that data that is not required, never makes it to Lustre. Of
+    course, 
     
-    user
+    %user
     
-    sysadmin
+    %sysadmin
     
-    write intensive
-    
-    
-    
-    \subsection{Effective use of available cluster resources}
-    \subsection{Comparisons to best case scenario}
-    
-    talk about testing
+    %write intensive
     
     
-    Flushing - rely on modification time
+    
+    %\subsection{Effective use of available cluster resources}
+    %\subsection{Comparisons to best case scenario}
+    
+    %talk about testing
+    
+    
+    %Flushing - rely on modification time
     \section{Conclusion}
