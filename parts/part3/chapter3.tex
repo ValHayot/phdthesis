@@ -1,11 +1,11 @@
-\chapter{Automated neuroimaging data management with the Sea filesystem}\label{chapter:sea-neuro}
+\chapter{Automated neuroimaging data management with Sea}\label{chapter:sea-neuro}
 
 Val\'erie Hayot-Sasson and Tristan Glatard \\
 \begingroup \footnotesize
 Department of Computer Science and Software Engineering, Concordia University, Montreal, Canada \\
 \endgroup 
 \vspace{5pt} \\
-In preparation: \\
+Manuscript in preparation. \\
 
 \section{Abstract}
 
@@ -37,7 +37,7 @@ In preparation: \\
     To minimize the costs of data transfers, Big Data frameworks, such as Apache
     Spark~\cite{zaharia2016apache} and Dask~\cite{rocklin2015dask} leverage
     memory and local storage as a cache. While these frameworks have been used
-    to process neuroimaging data~\cite{manypapers}, their popularity within the
+    to process neuroimaging data~\cite{rokem2021pan,thunder,boubela2016big}, their popularity within the
     domain remains low due to the effort required to rewrite standardize
     neuroimaging tools (e.g FSL, AFNI, SPM) for the frameworks. 
     % Although it is possible to use the tools within the Big Data frameworks,
@@ -129,32 +129,44 @@ In preparation: \\
     calls on Linux systems. This enables Sea to redirect write calls aimed for a slower storage device to a faster device whenever
     possible. Similarly, when intercepting read calls, Sea can choose to read from a faster device if a copy is available on that device.
     Sea decides which storage location it can write to based on the detailed provided in an initialization file called \texttt{sea.ini}. 
-    This file informs Sea of which locations it can use to read and write to, and well as their order of priority. An example of the initialization
-    file can be seen in ~\ref{seaini}\todo{Figure table,link?}.
+    This file informs Sea of which locations it can use to read and write to, and well as their order of priority.
+
+    We define all locations in which Sea can redirect writes to as a cache. Such caches include any available
+    storage located on the compute nodes, such as tmpfs or SSDs. 
+
+    As neuroimaging pipeline results are typically required post-processing and
+    HPC compute-local resources are only accessible during the reserved
+    duration, Sea provides functionality to flush and evict data to persistent
+    shared storage. This is accomplished via a separate thread (known as the
+    ``flusher'') that moves data from the caches to long-term storage. A
+    separate thread is used, in this case, to avoid interrupting on-going
+    processing with data management operations. Users must inform Sea of files
+    that need to be persisted to storage within a file called
+    \texttt{.sea\_flushlist}, and temporary files which can be removed from
+    cache within a file called the \texttt{.sea\_evictlist}. Both these files
+    can be populated using regular expressions to denote the paths to flush and
+    evict. If a file occurs in both the \texttt{.sea\_flushlist} and
+    \texttt{.sea\_evictlist}, Sea will interpret this as a \texttt{move}
+    operation and simply move the file from local to persistent storage rather
+    than copying it. Files that will be reused by the application should only be
+    flushed rather than flushed and evicted, as files can benefit from speedups
+    related to reading from fast rather than slow storage. Sea currently also
+    provides a rudimentary prefetch thread that can move files located within
+    the Sea filesystem to the fastest available cache. To use Sea's prefetch
+    capabilities, a file called \texttt{.sea\_prefetchlist} needs to be
+    populated using regular expressions like the flushing and eviction files.
     
-    As neuroimaging pipeline results are typically required post-processing and HPC compute-local resources are only accessible during the
-    reserved duration, Sea provides functionality to flush and evict data to persistent shared storage. This is accomplished via a separate
-    thread (known as the ``flusher'') that moves data from the caches \tristan{``the caches" haven't been defined} to long-term storage. A separate thread is used, in this case, to avoid
-    interrupting on-going processing with data management operations.
-    Users must inform Sea of files that need to be
-    persisted to storage within a file called \texttt{.sea\_flushlist}, and temporary files which can be removed from cache within a file
-    called the \texttt{.sea\_evictlist}\todo{I would have used .config/sea/evictlist, as user it is better to handle.}. Both these files can be populated using regular expressions to denote the paths to flush and evict.
-    If a file occurs in both the \texttt{.sea\_flushlist} and \texttt{.sea\_evictlist}, Sea will interpret this as a \texttt{move} operation
-    and simply move the file from local to persistent storage rather than copying it. Files that will be reused by the application should only
-    be flushed rather than flushed and evicted, as files can benefit from speedups related to reading from fast rather than slow storage.
-    Sea currently also provides a rudimentary prefetch thread that can move files located within the Sea filesystem to the fastest available cache.
-    To use Sea's prefetch capabilities, a file called \texttt{.sea\_prefetchlist} needs to be populated using regular expressions like the
-    flushing and eviction files.
+    To interact with the Sea file system, a mountpoint is used. The mountpoint
+    is an empty directory that behaves as a view to all the files and
+    directories stored within Sea. In order to keep track of the locations of
+    files within the mountpoint, Sea mirrors the directory structure of each
+    storage location across all caches. It is generally advisable to provide
+    empty storage locations for Sea to use as the mirroring of large directories
+    can take some time.
     
-    To interact with the Sea file system, a mountpoint is used. The mountpoint is an empty directory that behaves as a view to
-    all the files and directories stored within Sea. In order to keep track of the locations of the files within the mountpoint, Sea
-    mirrors the file structure of each storage location across all storage locations. That means, it is generally advisable to provide
-    empty storage locations for Sea to write to as the mirroring of large directories can take some time. When prefetching, it is
-    best to provide Sea with a path that only points to that data the requires prefetching as mirroring the paths of full datasets may 
-    extend processing time.\todo{maybe move that earlier. Overall, this paragraph is not clear. Does sea copies everything from all its mounted point?}
-    
-    Sea can easily be launched\todo{launched or tested?} directly using the available containers on the GitHub registry, or can be compiled via source using Make.
-    It requires a version of glibc greater than X\todo{what is X? 10?}. Once compiled, Sea can be executed using the \texttt{sea-app.sh} binary\todo{that doesnt look like an LDPRELOAD. Also, you can give a link to Sea's readme.}.
+    Sea can easily be executed directly using the available containers on the
+    GitHub registry, or can be compiled via source using gcc-C++ and Make. Once
+    compiled, Sea can be executed using the \texttt{sea\_launch.sh} bash script.
     
     \subsection{Performance analysis of Sea for fMRI preprocessing}
     
@@ -164,24 +176,22 @@ In preparation: \\
     vastly different data access patterns and compute times, we use fMRI prepreprocessing as our baseline for the benefits that can be
     obtained with Sea. 
     
-    
-    
     \subsubsection{Datasets}
     fMRI datasets may vary greatly in total number
     of images and number of volumes within each image. To adequately capture the 
     diversity of datasets and the applicability of Sea, we have selected three datasets of varying
-    time and space resolutions (Table~\ref{table:data}): 1) OpenNeuro's ds001545 dataset~\cite{ds001545},
+    time and space resolutions (Table~\ref{table:sea-neuro:data}): 1) OpenNeuro's ds001545 dataset~\cite{ds001545},
     2) the PREVENT-AD dataset~\cite{preventad}, and 3) the HCP dataset~\cite{HCP}.
-    The ds001545 dataset is a total of 45.94~$GB$ (1,778 files) and consists of data collected
+    The ds001545 dataset is a total of \SI{46}{\giga\byte} (1,778 files) and consists of data collected
     from 30 participants in a single session watching 3 different clips (i.e. three runs/participants) of the The Grand Budapest Hotel.
     
     
     The PREVENT-AD dataset is an open dataset comprising of data from 330 participants with a familial history
     of Alzheimer's Disease.
-    At the time of the experiments, the dataset contained 255.0~$GB$ (53,061 files) originating from the 308 subjects available on DataLad~\cite{}.
+    At the time of the experiments, the dataset contained \SI{255}{\giga\byte} (53,061 files) originating from the 308 subjects available on DataLad~\cite{halchenko2021datalad}.
     
     The HCP project, whose aim is to characterize brain connectivity using data collected from 1,200 subjects, is the largest of the three datasets.
-    At the time of our experimments, the dataset obtained consisted 85.4~$TB$ (x files\todo{what is x? 10?}) of data collected from 1,113 subjects.
+    At the time of our experimments, the dataset obtained consisted \SI{85}{\tera\byte} (15,716,060 files) of data collected from 1,113 subjects.
     
     By experimenting with datasets of different spatial and temporal resolutions, the amount of compute may be affected.
     Naturally, with more data there may inevitably be more computations performed, but also, the code itself may
@@ -193,25 +203,28 @@ In preparation: \\
       \small\centering
     \resizebox{\textwidth}{!}{\begin{tabular}{|c c c c c|}
       \hline
-      Dataset & Total Size (MB) & Total Number of images & Number of images processed & Total size processed (MB) \\
+      Dataset & Total Size (MB) & Total Number of images & Experiment parallel processes & Total compressed size processed (MB) \\
       \hline
-      \multirow{3}{*}{PREVENT-AD} & \multirow{3}{*}{289,532} & \multirow{3}{*}{53,061} & 1 & 51.26\\
-      & & & 8 & \\
-      & & & 16 & \\
+      \multirow{3}{*}{PREVENT-AD} & \multirow{3}{*}{289,532} & \multirow{3}{*}{53,061} & 1 & 52\\
+      & & & 8 & 402\\
+      & & & 16 & 732\\
       \hline
-      \multirow{3}{*}{ds001545} & \multirow{3}{*}{27,377} & \multirow{3}{*}{1,778} & 1 & 280.27\\
-      & & & 8 & \\
-      & & & 16 & \\
+      \multirow{3}{*}{ds001545} & \multirow{3}{*}{27,377} & \multirow{3}{*}{1,778} & 1 & 282\\
+      & & & 8 & 2115\\
+      & & & 16 & 4167\\
       \hline
-      \multirow{3}{*}{HCP} & \multirow{3}{*}{83,140,079} & \multirow{3}{*}{X} & 1 &  1299.93\\
-      & & & 8 & \\
-      & & & 16 & \\
+      \multirow{3}{*}{HCP} & \multirow{3}{*}{83,140,079} & \multirow{3}{*}{15,716,060*} & 1 &  1301\\
+      & & & 8 & 5998\\
+      & & & 16 & 8328\\
     
     
       \hline
     
       \hline
-    \end{tabular}}\caption{Dataset characteristics \tristan{I didn't get what the last 2 columns were}}\label{table:data}
+    \end{tabular}}
+    \footnotesize{*Number estimated based on data we had access to}\\
+    \caption{Dataset characteristics. Compressed size is listed as all applications, with the exception of SPM, processed
+    compressed data}\label{table:sea-neuro:data}
     \end{table*}
     
     %just for example run
@@ -229,30 +242,30 @@ In preparation: \\
     \subsubsection{fMRI Preprocessing Pipelines}
     
     Similarly to datasets, preprocessing pipelines can also vary in duration as a result of methodological differences.
-    Thus, we preprocessed each dataset using four \tristan{now three?} standard preprocessing pipelines using FSL~\cite{fsl}, AFNI~\cite{AFNI},
-    SPM~\cite{spm} and fMRIPrep~\cite{fmriprep} respectively. Table~\ref{table:pipelines} provides a reference of the differences in computation and data-intensivity
-    of the different pipelines on a single subject of all three of the datasets \todo{this sentence is complicated, but i forgot why}.
+    Thus, we preprocessed each dataset using three standard preprocessing pipelines using FSL~\cite{fsl}, AFNI~\cite{cox1996afni}, and
+    SPM~\cite{spm} respectively. Table~\ref{table:pipelines} provides a reference of the differences in computation and data-intensivity
+    of the different pipelines on a single subject for all three of the datasets.
     
-    Each tool was set to only run the preprocessing pipeline. Scripts used to execute each pipeline can be found at~\ref{github.com/valhayot/sea-slurm-scripts}.
+    Each tool was set to only run the preprocessing pipeline. Scripts used to execute each pipeline can be found at~\url{github.com/valhayot/sea-slurm-scripts}.
     
-    For the FSL preprocessing pipeline \tristan{Say that you used Feat with default params}, the default settings were maintained with the exception of slice-timing correction (interleaved),
-    intensity normalization and non-linear registration to standard space.
+    For the FSL preprocessing pipeline, we used FEAT configured with the many of the default parameters. We set the following parameters: slice-timing correction (interleaved) , 
+    intensity normalization and non-linear registration to standard space. FSL version 6.0.4 was used.
     
-    \tristan{Mention all tool versions}
-
     %% Add SPM here
-    To preprocess the datasets with SPM12, we reused the template described in \cite{haitas2021}, with fieldmap correction removed.
+    To preprocess the datasets with SPM12, we reused the template described in \cite{haitas2021age}, with fieldmap correction removed.
     As the template was designed for a specific dataset, we updated the paths to the fMRI and anatomical images,
     as well as the dimensions, such as the number of volumes and slices and the TR and TA, for each dataset. Furthermore,
     we set the slice order to interleaved in all cases. 
     
     For AFNI preprocessing, the pipeline was configured to perform slice timing, alignment to Talaraich space, registration, smoothing
     and brain masking. While AFNI does have some parallelized components that can be controlled via environment variables, we chose to let 
-    the pipeline use as much parallelism as required for its execution.
+    the pipeline use as much parallelism as required for its execution. AFNI version 21.1.02 was used.
+
+    All the application Dockerfiles with Sea pre-installed are available at~\url{https://github.com/ValHayot/Sea/tree/master/containers/applications}.
     
-    We set fMRIPrep to run with \texttt{--fs-no-reconall} flag set and set the \texttt{--bids\-database-dir} to a tmpfs location. 
-    Furthermore, the seeds were fixed to ensure reproducible results. Unlike the other tools where only a single fMRI image was preprocessed
-    per process, it was not possible to do so with fMRIPrep. Thus, fMRIPrep preprocessed entire subject directories at a time
+    % We set fMRIPrep to run with \texttt{--fs-no-reconall} flag set and set the \texttt{--bids\-database-dir} to a tmpfs location. 
+    % Furthermore, the seeds were fixed to ensure reproducible results. Unlike the other tools where only a single fMRI image was preprocessed
+    % per process, it was not possible to do so with fMRIPrep. Thus, fMRIPrep preprocessed entire subject directories at a time
 
     %%{provide subject #/session#} of the ds001545 dataset.
     
@@ -260,28 +273,32 @@ In preparation: \\
       \small\centering
       \resizebox{\textwidth}{!}{\begin{tabular}{|c c c c c c|}
       \hline
-      Tool & Dataset &  Output Size (MB) & Total libc calls & Libc Lustre calls & Compute time (s) \\
+      Tool & Dataset &  Output Size (MB) & Total libc calls & Libc Lustre calls & Compute time (s)* \\
       \hline
-      \multirow{3}{1em}{AFNI} & PREVENT-AD & 539.6 & 272,390 & 4,348 & 103.25 \\
-      & ds001545 & 3,063.4 & 281,707 & 4,570  & 280.30 \\
-      & HCP & 18,720.4 & 305,310 & 5,367 & 816.16 \\
+      \multirow{3}{1em}{AFNI} & PREVENT-AD & 540 & 272,342 & 4,118 & 103.25 \\
+      & ds001545 & 3,063 & 281,660 & 4,340 & 280.30 \\
+      & HCP & 18,720 & 305,555 & 5,137 & 816.16 \\
       \hline
-      \multirow{3}{1em}{FSL Feat} & PREVENT-AD & 253.7 & &  & 1,338.29 \\
-      & ds001545 & 550.6 & &  & 2,145.96 \\
-      & HCP & 1,607.9 & & & 6,596.46 \\
+      \multirow{3}{1em}{FSL Feat} & PREVENT-AD & 254 & 191,148 & 28,099 & 1,338.29 \\
+      & ds001545 & 551 & 192,404 & 28,371 & 2,145.96 \\
+      & HCP & 1,608 & 192,445 & 28,997 & 6,596.46 \\
       \hline
-      \multirow{3}{1em}{SPM} & PREVENT-AD & 331.0 & 34,868 & 10,048 &  483.67 \\
-      & ds001545 & 744.4 & 47,251 & 19,568 & 446.53 \\
-      & HCP & 2,082.5 & 54,753 & 25,226 & 715.43 \\
+      \multirow{3}{1em}{SPM} & PREVENT-AD & 331.0 & 42,329 & 18,257 &  483.67 \\
+      & ds001545 & 744 & 54,481 & 27,770 & 446.53 \\
+      & HCP & 2,083 & 62,234 & 33,477 & 715.43 \\
     
       \hline
-    \end{tabular}}\caption{Pipeline execution characteristics}\label{table:pipelines}
+    \end{tabular}}
+    \footnotesize{$*$ Measurements taken on the local cluster}
+    \caption{Pipeline execution characteristics}\label{table:seaneuro:pipelines}
     \end{table*}
+
     \subsection{Controls}
-    Our objective is to measure the speedup brought by Sea on real neuroimaging pipelines.
-    Although Sea is agnostic to the internals of the pipelines and their output results, incorrect parameter
-    selection and resulting outputs may result in I/O patterns that would not be observed had the
-    pipeline been executed properly.
+    Our objective is to measure the speedup brought by Sea on real neuroimaging
+    pipelines. Although Sea is agnostic to the internals of the pipelines and
+    their output results, incorrect parameter selection and resulting outputs
+    may result in I/O patterns that would not be observed had the pipeline been
+    executed properly.
     
     
     To validate that the outputs produced were sufficiently correct, we
@@ -296,55 +313,94 @@ In preparation: \\
     
     \subsection{Infrastructure}
     
-    \tristan{Sea configuration (which storage systems are used as cache and if pre-fetching/flushing/eviction were enabled) is missing}
-
-    Our experiments were exected on two different clusters: 1) a local cluster and 2) Compute Canada's Beluga cluster.
-    The local cluster was comprised of 8 compute nodes with 256~GB memory and 125~GB tmpfs, running Centos 8 \tristan{version?}.
-     Storage on the local
-    cluster was comprised of 4 Lustre ZFS storage nodes with 44 HDD OSTs and 1 MDS with a single MDT \tristan{define acronym}. The
-    storage nodes were connected to the compute nodes via a 20Gbps ethernet connection.
-    The cluster's hardware was similar to that of Beluga.
+    Our experiments were exected on two different clusters: 1) a local cluster
+    and 2) Compute Canada's Beluga cluster. The local cluster was comprised of 8
+    compute nodes with \SI{256}{\gibi\byte} memory and \SI{125}{\gibi\byte}
+    tmpfs, running Centos 8.1.1911.
     
-    The Beluga cluster consists of a total of 977 compute nodes, of which we used the \tristan{how many?} general compute nodes with 186~$GiB$ of available
-    memory, 480~$GiB$ of scratch SSD space, 2 Intel Gold 6148 Skylake @ 2.4 GHz CPUs and Centos 7 installed. Each compute node is connected
-    to the Lustre scratch filesystem via an Mellanox Infiniband EDR (100 Gb/s) network interconnect. The scratch filesystem consists of a total 2.6~$PiB$
-    of space, with 38 OSTs of 69.8~$TiB$ each and two MDTs of 3.3~$TiB$.
-    \todo{normalize si formatting everywhere}
+    Storage on the local cluster was comprised of 4 Lustre ZFS storage nodes
+    with 44 HDD object storage targets (OSTs) and 1 metadata server  (MDS) with
+    a single metadata target (MDT). The storage nodes were connected to the
+    compute nodes via a 20Gbps ethernet connection. The cluster's hardware was
+    similar to that of Beluga.
+    
+    The Beluga cluster consisted of a total of 977 compute nodes, of which we
+    used up to 16 general compute nodes at a time with \SI{186}{\gibi\byte} of
+    available memory, \SI{480}{\gibi\byte} of local scratch SSD space, 2 Intel Gold
+    6148 Skylake @ 2.4 GHz CPUs and Centos 7 installed. Each compute node was
+    connected to the Lustre scratch filesystem via an Mellanox Infiniband EDR
+    (100 Gbps) network interconnect. The Lustre scratch filesystem consists of a
+    total \SI{2.6}{\pebi\byte} of space, with 38 OSTs of \SI{69.8}{\tebi\byte}
+    each and two MDTs of \SI{3.3}{\tebi\byte}.
 
-    \tristan{check the use of present/past tense }
+    In our controlled local cluster, we ran the experiments with and without
+    Lustre deteriation, which we refer to as busy writers. Without busy writers,
+    the fMRI preprocessing pipelines have exclusive access to the cluster. With
+    busy writers, the fMRI preprocessing pipelines are executed alongside a
+    Spark application that reads and writes approximately 1000$\times$ 617~MB
+    blocks using 64 threads multiple times (until the fMRI preprocessing
+    applications completes), with a 5 seconds sleep between reads and writes. In
+    our experiments, we either had 6 nodes each executing the Spark application
+    or no busy writers.
 
-    In our controlled local cluster, we ran the experiments with and without Lustre deteriation, which we refer to as busy writers. Without
-    busy writers, the fMRI preprocessing pipelines have exclusive access to the cluster. With busy writers, the fMRI preprocessing pipelines are executed alongside
-    a Spark application that reads and writes approximately 1000 $\times$ 617~MB blocks using 64 threads multiple times (until the fMRI preprocessing applications completes),
-    with a 5 seconds sleep between reads and writes. In our experiments, we either had 6 nodes each executing the Spark application or no busy writers.
+    Our experiments generally did not use prefetching, flushing or eviction. The only
+    pipeline configured to prefetch was SPM, as the input data is otherwise read through
+    a memmap with Lustre. Flushing would be necessary with preprocessing as the user would always
+    require the output data. To investigate the impacts of flushing on these pipelines, we performed
+    a separate set of experiments where AFNI and SPM would flush all data produced, on Beluga.
 
-    To ensure that system performance was equivalent between Sea and baseline, we executed Sea and baseline pipelines together, for all experiments.
+    To ensure that system performance was equivalent between Sea and baseline,
+    we executed Sea and baseline pipelines together, for all experiments.
     
     %Busy writers
     \section{Results}
 
 
+
+% \tristan{I find this section lacks a clear focus. What are the key points from these results?
+% You should focus on them and possibly name your paragraphs accordingly, for improved clarity. My takeaways would be the following:
+% \begin{enumerate}
+%   \item In controlled conditions, important speed-ups are observed.
+%   Mention min, average and max speed-up for all conditions. 
+%   \item Speed-up is correlated with baseline makespan 
+%   \item Other determinants of speed-up are unclear
+%   \item Overhead is minor
+%   \item Speed-ups are also observed in production cluster
+% \end{enumerate}
+% }
 \begin{figure*}
 
 \begin{subfigure}{\textwidth}
     \centering
     \captionsetup{width=.85\linewidth}
-    \includegraphics[width=\columnwidth]{figures/sea-neuro/slashbin_results.pdf}%
+    \includegraphics[width=\columnwidth]{figures/sea-neuro/slashbin_nozoom.pdf}%
     \caption{Complete results}\label{fig:seaneuro:slashbinfull}
 \end{subfigure}
 \begin{subfigure}{\textwidth}
     \centering
     \captionsetup{width=.85\linewidth}
-    \includegraphics[width=\linewidth]{figures/sea-neuro/slashbin_results_zoomed.pdf}
+    \includegraphics[width=\linewidth]{figures/sea-neuro/slashbin_withzoom.pdf}
     \caption{Zoomed between 0 and 5000 seconds}\label{fig:seaneuro:slashbinzoom}
 \end{subfigure}
 \caption{Makespan comparison between Sea and Baseline on controlled local cluster}
 \label{fig:seaneuro:slashbin}
 \end{figure*}
 
-\subsection{Speedups observed in controlled environments}
+\subsection{Speedups observed in controlled environment}
 
-In Figure~\ref{fig:seaneuro:slashbin}, we observe that although performance is variable, 
+
+In Figure~\ref{fig:seaneuro:slashbin}, we observe that although performance is variable,
+there can be significant speedups obtained by using Sea when Lustre performance has been
+significantly deteriorated. On average, a single SPM process preprocessing a single HCP
+image produced the greatest speedup (13$\times$). AFNI preprocessing a single fMRI image of the
+PREVENT-AD dataset using a single process was the next fastest pipeline, with an average speedup of (5$\times$).
+FSL FEAT had speedups as well, with a maximum average speedup of 1.3$\times$ when preprocessing a single PREVENT-AD
+image. SPM consistently had excellent speedups, and it is likely due to a mix of prefetching the initial input files
+and the I/O patterns of the application. While it was expected that AFNI would be the application that would benefit the most from
+Sea due to its minimal compute time and the amount of data it generates, it did not benefit from to the extent that SPM did.
+As per Table~\ref{table:seaneuro:pipelines}, AFNI performs a very high number of libc calls. While the overhead of an individual call
+is likely very minimal, it is possible that the culmination of all these calls results in a large enough bottleneck that affect both
+Sea and baseline executions an extensive amount. Moreover, 
 
 \subsection{Speedup correlated with Lustre deterioration}
 
@@ -352,63 +408,47 @@ In Figure~\ref{fig:seaneuro:slashbin}, we observe that although performance is v
 
 \subsection{Speedups observed in production environments}
 
-In Figure~\ref{fig:seaneuro:slashbin}, we see that although baseline's makespan increases with the presence of busy writers,
-Sea's makespan remains relatively stable respective to the dataset and pipeline used. AFNI has a significantly shorter makespan
-than SPM \tristan{Not sure if you want to compare pipelines with each other}, regardless of the presence of busy writers and dataset type. However, makespan in AFNI is naturally influenced by the presence of both.
-
-For both \tristan{the three} pipelines, PREVENT-AD has the shortest makespan, with parallelism being a determining factor for speedup. For instance, if we look
-at \ref{fig:seaneuro:slashbinzoom}, when using a single process, Sea appears to be consistently faster than baseline for both pipelines.
-When we increase the level of parallelism to 8 pipeline processes, whereas Sea is still consistently faster than baseline for AFNI, this
-is no longer true for SPM. Interestingly enough, baseline appears to outperform itself with 6 busy writers at 8 parallel processes, whereas
-this is not the case at 16 parallel processes. At 16 parallel processes, Sea and Baseline perform almost identically for both SPM and AFNI.
-
-In the case of ds001545, the next smallest dataset \tristan{not according to table 10.1}, Sea is faster than baseline with SPM for all parallel conditions, with a maximum speedup of 25.8$\times$~\todo{verify that there was no failure here as average is 3x} at 1 image.
-Average speedup was found to be 4$\times$ and 2$\times$ for 8 and 16 threads, respectively. A possible reason for diminishing speedup with increased number of 
-threads is that each process may be competing for compute resources as we did not restrict the number of parallel threads.
-AFNI, on the other hand, experiences a speedup with Sea at 1 (1.7$\times$) parallel processes, but a slight slowdown (0.96$\times$) at 8 parallel processes.
-At 16 parallel processes, Sea and Baseline perform similarly. A possible explanation for the slowdown at 8 processes may be related to a memory bottleneck. That is, with the increase in data occupying memory space and additional memory required by the processes, there may be additional data transfers occuring at the CPU-level as a result of initial data placement.
-
-Similarly, HCP, the largest dataset, experienced greater speedups with SPM than with AFNI \tristan{Again, I don't know if comparing pipelines is what you want to do}. Average speedups with
-SPM were found to be 6.8$\times$, 2.7$\times$ and 1.8$\times$, for 1, 8 and 16 parallel processes, respectively. Speedups with AFNI
-were found to be 1.2$\times$, 2.3$\times$ and 1.6$\times$ at 1, 8 and 16 parallel processes. Unlike with ds001545, AFNI does not experience a slowdown with Sea at 8 parallel processes, possibly due to page cache being overloaded with baseline as a result of the data size and frequency of the writes.
-
-\tristan{I find this section lacks a clear focus. What are the key points from these results?
-You should focus on them and possibly name your paragraphs accordingly, for improved clarity. My takeaways would be the following:
-\begin{enumerate}
-  \item In controlled conditions, important speed-ups are observed.
-  Mention min, average and max speed-up for all conditions. 
-  \item Speed-up is correlated with baseline makespan 
-  \item Other determinants of speed-up are unclear
-  \item Overhead is minor
-  \item Speed-ups are also observed in production cluster
-\end{enumerate}
-}
-
 \begin{figure*}
 
 \begin{subfigure}{\textwidth}
     \centering
     \captionsetup{width=.85\linewidth}
-    \includegraphics[width=\columnwidth]{figures/sea-neuro/beluga_sea_all.pdf}%
+    \includegraphics[width=\columnwidth]{figures/sea-neuro/beluga_withoutflush_nozoom.pdf}%
     \caption{Complete results}\label{fig:seaneuro:belugafull}
 \end{subfigure}
 \begin{subfigure}{\textwidth}
     \centering
     \captionsetup{width=.85\linewidth}
-    \includegraphics[width=\linewidth]{figures/sea-neuro/beluga_sea_zoom.pdf}
+    \includegraphics[width=\linewidth]{figures/sea-neuro/beluga_withoutflush_zoom.pdf}
     \caption{Zoomed between 0 and 2000 seconds}\label{fig:seaneuro:belugazoom}
 \end{subfigure}
-\caption{Makespan comparison between Sea and Baseline on Beluga}
-\label{fig:seaneuro:beluga}
+\caption{Makespan comparison between Sea and Baseline on Beluga with flushing is disabled}
+\label{fig:seaneuro:beluga-noflush}
 \end{figure*}
 
-The Beluga results (Figure~\ref{fig:seaneuro:beluga}), 
-shows that Sea and Baseline generally performed 
-similarly, but that occassionally, we can obtain large 
-speedups with Sea, presumably when Lustre is 
-overburdened. The largest speedup obtained by the use of
-Sea is 3.2$\times$ which occurred when running SPM on ds001545 with 8 parallel processes. The greatest
-slowdown experienced from using Sea was found to be 0.7$\times$, which occurred when running SPM on ds001545 with a single process. 
+\begin{figure*}
+\begin{subfigure}{\textwidth}
+    \centering
+    \captionsetup{width=.85\linewidth}
+    \includegraphics[width=\columnwidth]{figures/sea-neuro/beluga_withflush_nozoom.pdf}%
+    \caption{Complete results}\label{fig:seaneuro:belugafullwf}
+\end{subfigure}
+\begin{subfigure}{\textwidth}
+    \centering
+    \captionsetup{width=.85\linewidth}
+    \includegraphics[width=\linewidth]{figures/sea-neuro/beluga_withflush_zoom.pdf}
+    \caption{Zoomed between 0 and 2000 seconds}\label{fig:seaneuro:belugazoomwf}
+\end{subfigure}
+\caption{Makespan comparison between Sea and Baseline on Beluga when flushing on all files is enabled}
+\label{fig:seaneuro:beluga-wflush}
+\end{figure*}
+
+\begin{figure*}
+\centering
+\includegraphics[width=\columnwidth]{figures/sea-neuro/beluga_sea_tmpfs.pdf}%
+\caption{Makespan comparison between Sea and tmpfs on Beluga with flushing disabled}
+\label{fig:seaneuro:tmpfs}
+\end{figure*}
 
     
     
