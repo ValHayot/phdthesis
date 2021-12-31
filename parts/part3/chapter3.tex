@@ -1,4 +1,4 @@
-\chapter{Automated neuroimaging data management with the Sea filesystem}
+\chapter{Automated neuroimaging data management with the Sea filesystem}\label{chapter:sea-neuro}
 
 Val\'erie Hayot-Sasson and Tristan Glatard \\
 \begingroup \footnotesize
@@ -8,69 +8,107 @@ Department of Computer Science and Software Engineering, Concordia University, M
 In preparation: \\
 
 \section{Abstract}
-	Neuroimaging open-data initiatives have led to the availability of large scientific datasets. These voluminous
-	datasets provide researchers with new insights into the human brain across diverse populations. Difficulties with
-	managing such large data have partially hindered the advancement of scientific studies analyzing these datasets. Many
-	software tools and strategies have emerged to facilitate the processing. Many open datasets have been stored on cloud storage
-	services, such as AWS, enabling rapid transfer of the data at a cost\todo{What cost?}. Software tools such as Datalad have facilitated both the
-	sharing and versioning of data. Despite these advancements, in-analysis data-management \tristan{unclear what it is} remains limited in neuroimaging workflows.
+
+	Neuroimaging open-data initiatives have led to increased availability of large scientific datasets. 
+  Whereas these datasets are shifting the processing bottleneck from compute-intensive to data-intensive,
+  current standardized analysis tools lag behind in the adoption of strategies to mitigate the costs associated with
+  data transfers. A major challenge in adapting these tools for data-intensive processing is that they must be entirely
+  rewritten.
+  
+  In order to facilitate data management for standardized neuroimaging tools, we developped Sea, a library that intercepts
+  and redirects application read and write calls to minimize data transfer time. In this paper, we investigate
+  the performance of Sea on two standard fMRI preprocessing pipelines, SPM and AFNI, using three neuroimaging datasets of different sizes
+  (OpenNeuro's ds001545, PREVENT-AD and the HCP dataset) on two high-performance computing clusters. Our results demonstrate that given the features of the applications and datasets,
+  Sea provides large speedups when the shared filesystem's (e.g. Lustre) performance is deteriorated. When the shared filesystem is not overburdened by other users,
+  performance is unaffected by Sea, suggesting that Sea's overhead is minimal even in cases where it is not useful.
+  
+  \section{Introduction}\label{sec:sea_neuro:introduction}
     
-	Neuroimaging workflows, particularly preprocessing ones, may lead to a magnification in output sizes due to the production 
-  of multiple derivatives for a given dataset. They also produce
-	significant amounts of intermediary data due to being composed of a multitude of steps. 
-    \todo{this sounds a lot like an intro that teasing about general context, not an abstract that summarize the chapter}
-  \tristan{+1}
-    \section{Introduction}\label{sec:sea_neuro:introduction}
+    Neuroimaging datasets continue to grow in size resulting in new challenges
+    related to data management. The current largest neuroimaging datasets, such
+    as the Human Connectome Project (HCP)~\cite{HCP} and the UK
+    Biobank~\cite{ukbiobank} reach up to Petabytes of data. For datasets of this
+    volume, there is no choice but to store the data in slower remote storage,
+    which can incur significant data transfer costs when attempting to read.
+    Should the processed data be of a similar magnitude in volume, application
+    writes will also need to be made to compute-remote storage thus further
+    prolonging application makespan. 
+
+    To minimize the costs of data transfers, Big Data frameworks, such as Apache
+    Spark~\cite{zaharia2016apache} and Dask~\cite{rocklin2015dask} leverage
+    memory and local storage as a cache. While these frameworks have been used
+    to process neuroimaging data~\cite{manypapers}, their popularity within the
+    domain remains low due to the effort required to rewrite standardize
+    neuroimaging tools (e.g FSL, AFNI, SPM) for the frameworks. 
+    % Although it is possible to use the tools within the Big Data frameworks,
+    % optimizations like in-memory computing would not be leveraged due to the
+    % fact that neuroimaging tools are meant to be used as command-line tools
+    % and do not provide interfaces that enable the data to be transferred
+    % in-memory.
     
-    Neuroimaging datasets continue to grow in size resulting in new challenges related
-    to data management. The current largest neuroimaging datasets, such as the Human Connectome Project (HCP)~\cite{HCP}
-    and the UK Biobank~\cite{ukbiobank} reach up to Petabytes of data. Big Data in neuroimaging can be present in two formats: 1)
-    very large files, such as those found in the BigBrain~\cite{bigbrain}, and 2)\todo{what is that 2?} large datasets made up of small files,
-    such as those typically found in fMRI datasets. 
+    Frameworks used in neuroimaging, such as NiPype~\cite{nipype} and
+    Joblib~\cite{joblib} instead focus on reducing compute time of workloads via parallelization of tasks.
+    %This is because even with large datasets, neuroimaging data processing
+    %remains split between compute and data intensive components.
+    Although these
+    frameworks do not prohibit the use of data management strategies, it is not
+    directly integrated into the workflow. In order to give neuroimaging
+    applications data management capabilities, the applications must interact
+    with a file system that can do so.
+
+    Big Data in neuroimaging can be present in two formats: 1) very large files (e.g. BigBrain~\cite{amunts2013bigbrain}) and
+    2) small files pertaining to a population of individuals, such as those found in MRI datasets, that collectively
+    amount to a large dataset. Differences in the number and size of files result in different data transfer overheads.
+    Whereas large file I/O is predominantly impacted by the underlying storage bandwidth, small file I/O is results in a
+    significant latency overhead. Addressing both of these issues in neuroimaging is important, however, for this paper
+    we focus on fMRI datasets, which are currently more likely to experience a latency overhead. We chose to focus
+    on these types of datasets due to the number of well-established tools that process the data.
+
     
-    When processing, large datasets can result in longer processing times even when compute resources are ample.
-    This is a direct result of the underlying storage used by the applications to read and write data. Since large
-    datasets require a significant amount of available storage space, more often than not, slower but larger storage is
-    selected, resulting in longer data transfer times during processing. With the Sea filesystem, we aim to
-    leverage all available storage in order to reduce overall data transfer time during pipeline execution.
+    %Big Data in neuroimaging can be present in two formats: 1)
+    %very large files, such as those found in the BigBrain~\cite{bigbrain}, and 2)\todo{what is that 2?} large datasets made up of small files,
+    %such as those typically found in fMRI datasets. 
     
-    Many researchers rely on one of two systems to meet their storage and computing needs: 1) High Performance 
-    Computing (HPC) clusters and 2) the cloud. Whereas the cloud simplifies data sharing and gives researchers
-    access to a wide variety of infrastructures, HPC clusters are a cost-effective solution to accessing a wide
-    array of resources for researchers. In this paper, we will focus on HPC processing.
+    % When processing, large datasets can result in longer processing times even when compute resources are ample.
+    % This is a direct result of the underlying storage used by the applications to read and write data. Since large
+    % datasets require a significant amount of available storage space, more often than not, slower but larger storage is
+    % selected, resulting in longer data transfer times during processing. With the Sea filesystem, we aim to
+    % leverage all available storage in order to reduce overall data transfer time during pipeline execution.
     
-    HPC systems rely on scalable network-based parallel filesystems (e.g. Lustre) for storage. While such file
-    systems offer excellent performance, they are shared between all the users on the cluster, meaning that users
-    with data-intensive applications can effectively deteriorate the performance of the shared file system for all users on
-    the cluster. Solutions for improving shared file system performance include throttling the data intensive workloads
-    or recommending the use of Burst Buffers~\cite{bb} (e.g. reserving a compute node for storage or leveraging
-    local compute storage during processing). The latter, however, requires that the user manages their data to
-    and from the Burst Buffer.
+    Many researchers rely on one of two systems to meet their storage and
+    computing needs: 1) High Performance Computing (HPC) clusters and 2) the
+    cloud. Whereas the cloud simplifies data sharing and gives researchers
+    access to a wide variety of infrastructures, HPC clusters are a
+    cost-effective solution to accessing a wide array of resources for
+    researchers. %In this paper, we will focus on HPC processing.
     
-    Leveraging local storage to improve data intensive workload performance has long since existed in Big Data
-    frameworks such as Apache Spark~\cite{spark} and Dask~\cite{dask}. While these frameworks have been used to
-    process neuroimaging data~\cite{manypapers}, they remain seldom used as their require rewriting existing
-    standard neuroimaging tools (e.g FSL, AFNI, SPM) for the framework. Although it is possible to use the
-    tools within the Big Data frameworks, optimizations like in-memory computing would not be leveraged due to 
-    the fact that neuroimaging tools are meant to be used as command-line tools and do not provide interfaces that 
-    enable the data to be transferred in-memory.
+    HPC systems rely on scalable network-based parallel filesystems (e.g.
+    Lustre) for storage. While such file systems offer excellent performance,
+    they are shared between all the users on the cluster, meaning that users
+    with data-intensive applications can effectively deteriorate the performance
+    of the shared file system for all users on the cluster. Solutions for
+    improving shared file system performance include throttling the data
+    intensive workloads or recommending the use of Burst Buffers~\cite{bb} (e.g.
+    reserving a compute node for storage or leveraging local compute storage
+    during processing). The latter, however, requires that the user manages
+    their data to and from the Burst Buffer.
     
-    Frameworks used in neuroimaging, such as NiPype~\cite{nipype} and Joblib~\cite{joblib} instead focus on reducing compute times of workloads.
-    This is because even with large datasets, neuroimaging data processing remains split between compute and data
-    intensive components. Although these frameworks do not prohibit the use of intelligent data management, it is not directly integrated
-    into the workflow. In order to give neuroimaging applications data management capabilities, the applications must interact with a
-    file system that can do so.
+    In order for a file system to be usable by the average researcher on an HPC
+    cluster, they must be loadable without administrative privileges.
+    Furthermore, as the applications are typically made to interact with
+    POSIX-based file systems, the new file system must also be compliant to the
+    format. One method to ensure that these conditions are met is by using the
+    \texttt{LD\_PRELOAD} trick. This trick is used to intercept select library
+    calls and redefine their behaviour. It has been used in many projects and to
+    create lightweight versions of filesystems~\cite{xtreemfs}. 
     
-    In order for a file system to be usable by the average researcher on an HPC system, they must be loadable without administrative
-    privileges. Furthermore, as the applications are typically made to interact with POSIX-based file systems, the new file system must
-    also be compliant to the format. One method to ensure that these conditions are met is by using the \texttt{LD\_PRELOAD} trick. This trick is
-    used to intercept select library calls and redefine their behaviour. It has been used in many projects and to create lightweight versions
-    of filesystems~\cite{xtreemfs}. 
-    
-    In this paper, we present Sea, a file system designed to automate data management of neuroimaging pipelines running on HPC systems.
-    The goal of Sea is to complement existing neuroimaging applications such that both efficient compute and data management can be achieved
-    executed on HPC without significant user intervention. As a secondary goal, Sea aims to ensure the fair sharing of cluster usage
-    by alleviating the impacts of heavy writers on the shared file systems as a whole. 
+    In this paper, we present Sea, a file system designed to automate data
+    management of neuroimaging pipelines running on HPC systems. The goal of Sea
+    is to complement existing neuroimaging applications such that both efficient
+    compute and data management can be achieved executed on HPC without
+    significant user intervention. As a secondary goal, Sea aims to ensure the
+    fair sharing of cluster usage by alleviating the impacts of heavy writers on
+    the shared file systems as a whole. 
     
     \tristan{Intro logic is good but writing could be polished}
     \tristan{Outlining the content of the paper would be useful}
@@ -304,6 +342,16 @@ In preparation: \\
 \label{fig:seaneuro:slashbin}
 \end{figure*}
 
+\subsection{Speedups observed in controlled environments}
+
+In Figure~\ref{fig:seaneuro:slashbin}, we observe that although performance is variable, 
+
+\subsection{Speedup correlated with Lustre deterioration}
+
+\subsection{Overhead of Sea is minimal}
+
+\subsection{Speedups observed in production environments}
+
 In Figure~\ref{fig:seaneuro:slashbin}, we see that although baseline's makespan increases with the presence of busy writers,
 Sea's makespan remains relatively stable respective to the dataset and pipeline used. AFNI has a significantly shorter makespan
 than SPM \tristan{Not sure if you want to compare pipelines with each other}, regardless of the presence of busy writers and dataset type. However, makespan in AFNI is naturally influenced by the presence of both.
@@ -401,7 +449,7 @@ slowdown experienced from using Sea was found to be 0.7$\times$, which occurred 
     only demonstrate the speedups brought by Sea when Lustre performance has been deteriorated.
 
 
-    Sea may not be ideal in instances where there is a memory bottleneck, for instance, as speculated
+    Sea may not be ideal in instances where there is a CPU bottleneck, for instance, as speculated
     with AFNI and ds0015454 using 8 parallel processes on our local cluster. In these experiments, Sea wrote the majority of the results to tmpfs space.
     Since the applications also require a substantial amount of memory space,
     this may have resulted in increased CPU communication. In these cases, it

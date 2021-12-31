@@ -1,26 +1,26 @@
-\chapter{Conclusion}
+% \chapter{Conclusion}
 
 
-%% need to include numbers
-Our evaluations demonstrate that available Big Data solutions would address performance limitations
-arising from increased dataset size. These can be quite high depending on where the pipeline ranks in
-terms of the data-to-compute ratio. When comparing Big Data Frameworks to existing neuroimaging pipelines,
-it is observed that they perform identically when the built-in data management strategies are removed. Therefore,
-neuroimaging pipelines benefit from incorportating such strategies regardless of where they rank currently
-within the data-compute-ratio. However, the barrier to entry of using these engines remain high. Widely recognized
-neuroimaging pipelines would need to be rewritten for these frameworks and some features standard in neuroimaging pipeline
-engines, such as provenance tracking would need to be implemented for these frameworks.
+% %% need to include numbers
+% Our evaluations demonstrate that available Big Data solutions would address performance limitations
+% arising from increased dataset size. These can be quite high depending on where the pipeline ranks in
+% terms of the data-to-compute ratio. When comparing Big Data Frameworks to existing neuroimaging pipelines,
+% it is observed that they perform identically when the built-in data management strategies are removed. Therefore,
+% neuroimaging pipelines benefit from incorportating such strategies regardless of where they rank currently
+% within the data-compute-ratio. However, the barrier to entry of using these engines remain high. Widely recognized
+% neuroimaging pipelines would need to be rewritten for these frameworks and some features standard in neuroimaging pipeline
+% engines, such as provenance tracking would need to be implemented for these frameworks.
 
-Barrier-to-entry constraints aside, Big Data Frameworks are not well-suited to be executed on HPC clusters. To communicate
-between nodes, these frameworks rely on the use of overlay clusters that rely on the availability of multiple nodes for optimal performance.
-While our research demonstrates that there is little difference in the time spent on the resource allocation queue between batch and pilot scheduling,
-pilot scheduling of Big Data Frameworks are more prone to failures with workers not starting, and batch scheduling of
-large numbers of nodes may still increase time spent on the resource allocation queue. 
+% Barrier-to-entry constraints aside, Big Data Frameworks are not well-suited to be executed on HPC clusters. To communicate
+% between nodes, these frameworks rely on the use of overlay clusters that rely on the availability of multiple nodes for optimal performance.
+% While our research demonstrates that there is little difference in the time spent on the resource allocation queue between batch and pilot scheduling,
+% pilot scheduling of Big Data Frameworks are more prone to failures with workers not starting, and batch scheduling of
+% large numbers of nodes may still increase time spent on the resource allocation queue. 
 
-Software solutions for the handling of Big Data in neuroimaging have reduced applicability to neuroimaging due to the constraints
-defined by the constituents of neuroimaging pipelines and the infrastructure that these pipelines are typically executed on. Hardware
-solutions such as the \optane can be made available to researchers through access to such specialized infrastructure. With access to such hardware,
-neuroimaging pipeline would benefit from speedups without any modification. However, such storage comes at an increased cost and it is likely that 
-access would be restricted and potentially temporary. Researchers would still need to perform some form of data management to transfer the data to slower
-storage with persistent access.
+% Software solutions for the handling of Big Data in neuroimaging have reduced applicability to neuroimaging due to the constraints
+% defined by the constituents of neuroimaging pipelines and the infrastructure that these pipelines are typically executed on. Hardware
+% solutions such as the \optane can be made available to researchers through access to such specialized infrastructure. With access to such hardware,
+% neuroimaging pipeline would benefit from speedups without any modification. However, such storage comes at an increased cost and it is likely that 
+% access would be restricted and potentially temporary. Researchers would still need to perform some form of data management to transfer the data to slower
+% storage with persistent access.
 
