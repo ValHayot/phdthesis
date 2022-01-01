@@ -349,7 +349,8 @@ Manuscript in preparation. \\
     require the output data. To investigate the impacts of flushing on these pipelines, we performed
     a separate set of experiments where AFNI and SPM would flush all data produced, on Beluga.
 
-    To ensure that system performance was equivalent between Sea and baseline,
+    For all experiments, we compared the performance of Sea with that of Lustre alone (baseline).
+    To ensure that system performance was equivalent between Sea and our baseline,
     we executed Sea and baseline pipelines together, for all experiments.
     
     %Busy writers
@@ -389,22 +390,81 @@ Manuscript in preparation. \\
 \subsection{Speedups observed in controlled environment}
 
 
-In Figure~\ref{fig:seaneuro:slashbin}, we observe that although performance is variable,
-there can be significant speedups obtained by using Sea when Lustre performance has been
-significantly deteriorated. On average, a single SPM process preprocessing a single HCP
-image produced the greatest speedup (13$\times$). AFNI preprocessing a single fMRI image of the
-PREVENT-AD dataset using a single process was the next fastest pipeline, with an average speedup of (5$\times$).
-FSL FEAT had speedups as well, with a maximum average speedup of 1.3$\times$ when preprocessing a single PREVENT-AD
-image. SPM consistently had excellent speedups, and it is likely due to a mix of prefetching the initial input files
-and the I/O patterns of the application. While it was expected that AFNI would be the application that would benefit the most from
-Sea due to its minimal compute time and the amount of data it generates, it did not benefit from to the extent that SPM did.
-As per Table~\ref{table:seaneuro:pipelines}, AFNI performs a very high number of libc calls. While the overhead of an individual call
-is likely very minimal, it is possible that the culmination of all these calls results in a large enough bottleneck that affect both
-Sea and baseline executions an extensive amount. Moreover, 
+In Figure~\ref{fig:seaneuro:slashbin}, we observe that although performance is
+variable, there can be significant speedups obtained by using Sea when Lustre
+performance has been significantly deteriorated. On average, a single SPM
+process preprocessing a single HCP image produced the greatest speedup
+(13$\times$). AFNI preprocessing a single fMRI image of the PREVENT-AD dataset
+using a single process was the next fastest pipeline, with an average speedup of
+(5$\times$). FSL Feat had speedups as well, with a maximum average speedup of
+1.3$\times$ when preprocessing a single PREVENT-AD image. SPM consistently had
+excellent speedups, and it is likely due to a mix of prefetching the initial
+input files and the I/O patterns of the application. While it was expected that
+AFNI would be the application that would benefit the most from Sea due to its
+minimal compute time and the amount of data it generates, it did not benefit
+from to the extent that SPM did. As per Table~\ref{table:seaneuro:pipelines},
+AFNI performs a very high number of libc calls. While the overhead of an
+individual call is likely very minimal, it is possible that the culmination of
+all these calls results in a large enough bottleneck that affect both Sea and
+baseline executions an extensive amount. Moreover, the number of libc calls
+aimed at interacting with data on the Lustre storage are very few. AFNI still
+obtained an average of 2$\times$ speedup across all experimental conditions.
+
+FSL Feat, in contrast, appears to be the most compute-bound of the three
+applications. Not only did it spend a significant amount of time computing, the
+amount of output data generated was least of the three. Due to the
+compute-intensive nature of FSL Feat, it is expected that it resulted in the
+least significant speedups.
+
+Our results indicate that HCP, on average, obtained the greatest speedups with
+Sea. Out of the three datasets, HCP has the largest images (See:
+Table~\ref{table:sea-neuro:data}). larger individual images mean that they
+occupy more page cache space and take longer to flush to Lustre. Unsurprisingly,
+the next dataset with the largest images (\SI{282}{\mebi\byte} compressed for a
+single image) results in the next largest speedups, followed by PREVENT-AD, the
+dataset with the smallest functional images.
+
+For both the pipelines and the datasets, we noticed that obtained speedups
+decrease with increased parallelism. We did not modify the default parallelism
+level of the applications in or experiments. As a result, each application
+process is likely attempting to utilize all cores resulting in longer wait times
+with the increase in threads. With this unintentional additional wait time that
+is added to the applications due to compute contention, the benefits of using
+Sea becomes more limited.
+
 
 \subsection{Speedup correlated with Lustre deterioration}
 
+Baseline performance without busy writers generally falls under the identity
+line, as can be seen in Figure~\ref{fig:seaneuro:slashbin}. However, when we add
+busy writers, baseline performance can deviate significantly from the identity
+line. We observe that the more Baseline deviates from this identity line, the
+greater the speedup.
+
+It is only in instances where Lustre performance does not deviate signicantly from
+identity line that we can observe slowdowns from using Sea. These slowdowns
+may arise from the initial read of the data, as they appear to occur less frequently
+with SPM, or potentially due to increased contention on memory.
+
+
+
 \subsection{Overhead of Sea is minimal}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\columnwidth]{figures/sea-neuro/beluga_sea_tmpfs.pdf}%
+\caption{Makespan comparison between Sea and tmpfs on Beluga with flushing disabled}
+\label{fig:seaneuro:tmpfs}
+\end{figure*}
+
+To determine the overhead of Sea, we compared the average performace of Sea with
+the performance of pipeline executing entirely within memory
+(Figure~\ref{fig:seaneuro:tmpfs}). The results demonstrate that Sea and tmpfs
+behave more or less identically. Given these results, we conclude that the
+overhead of Sea is not significant and that the differences in makespan may be
+due to Sea's initial reading of the data from Lustre.
+
 
 \subsection{Speedups observed in production environments}
 
@@ -443,60 +503,73 @@ Sea and baseline executions an extensive amount. Moreover,
 \label{fig:seaneuro:beluga-wflush}
 \end{figure*}
 
-\begin{figure*}
-\centering
-\includegraphics[width=\columnwidth]{figures/sea-neuro/beluga_sea_tmpfs.pdf}%
-\caption{Makespan comparison between Sea and tmpfs on Beluga with flushing disabled}
-\label{fig:seaneuro:tmpfs}
-\end{figure*}
+  Figures~\ref{fig:seaneuro:beluga-noflush} and \ref{fig:seaneuro:beluga-wflush}
+  shows us that although performance in production clusters is highly variable, we can
+  still obtain significant speedups. It is very likely that when we executed our experiments
+  without flushing (Figure~\ref{fig:seaneuro:beluga-noflush}), there was no signification performance
+  deterioration on Lustre, resulting in Sea and Baseline performing quite similarly to each other.
+  
+  Our results with flushing enabled confirm this theory. When running with flushling enabled,
+  which would have the additional overhead of having to ensure that all the data is copied to
+  Lustre, we notice that occasionally, we obtain very large speedups with both SPM 
+  and AFNI, indicating that Lustre performance, in the moment when the pipeline executed, was deteriorated.
+  The maximum speedup observed when running on Beluga with flushing enabled was 11$\times$ with AFNI 
+  processing 1 HCP image. The maximum speedup for SPM was 3.2$\times$, processing 8 ds001545 images.
 
-    
     
     \section{Discussion}
     \subsection{Significance of speedups with Sea}
 
     Our results show that the speedups obtained from
-    using Sea can be quite substantial (up to 25.8$\times$)
+    using Sea can be quite substantial (up to 32$\times$)
     depending on the deterioration of the Lustre
-    filesystem. On a production cluster where Lustre I/O could not be controlled, we obtained a maximum speedup of 3.2$\times$.
+    filesystem. Our best results on a production cluster were found to be
+    11$\times$.
 
-    While in the average case, Sea and Baseline performed similarly, it is impossible for the
-    average cluster user to know if Lustre's performance
-    will be deteriorated during the lifetime of their
-    application execution \tristan{nor to predict how such a deterioration would impact the application}. The fact that Sea and Baseline perform similarly in the average case is indicator that runtime is generally not
-    deteriorated by Sea and is safe to use in the event where Lustre performance is sufficiently deteriorated.
+    While in the average case on Beluga, Sea and Baseline performed similarly, it is
+    impossible for the average cluster user to know if Lustre's performance will
+    be deteriorated during the lifetime of their application execution,
+    nor to predict how such a deterioration would impact the
+    application. The fact that Sea and Baseline perform similarly in the
+    average case is indicator that runtime is generally not deteriorated by Sea,
+    as also demonstrated by comparing Sea's performance with tmpfs, 
+    and is safe to use in the event where Lustre performance is sufficiently
+    deteriorated.
 
     Although Sea did result in performance deterioration at times, the
     magnitude of deterioration is significantly less than that of possible
     speedups obtained. Our controlled experiments demonstrate that using
     Sea with a deteriorated Lustre filesystem can result in average
-    speedups of up to 2.6$\times$. Such results indicate that the risk of a
+    speedups of up to 2.5$\times$. Such results indicate that the risk of a
     slowdown with Sea are less important that the potential speedups that
     can arise.
 
     \subsection{Limitations of using Sea}
     
-    Sea really shines when it is executed on a data intensive pipeline.
-    This means, the data is written at a rate which exceeds the rate at
-    which the compute node's page cache can flush results to Lustre. In
-    our experiments, the pipeline which consisted of both the shortest
-    duration and largest output size was AFNI processing HCP with 16 subjects.
-    While it wrote approximately 100~GB of data, the controlled cluster would
-    have had approximately 44~GB of dirty cache available per OST and a maximum
-    amount of 100~GB of page cache. Since all writes would not have occurred at the same time
-    and computation time was extended as a result of CPU contention, even our controlled experiments
-    do not showcase the benefits of Sea in a highly data intensive scenario. However, HCP is one of the largest fMRI datasets, thus the only way to augment data intensitivity of the applications is through increased parallelism which is limited by the number of available cores. As a result, we can
-    only demonstrate the speedups brought by Sea when Lustre performance has been deteriorated.
+    Sea really shines when it is executed on a data-intensive pipeline. This
+    means, the data is written at a rate which exceeds the rate at which the
+    compute node's page cache can flush results to Lustre. In our experiments,
+    the pipeline which consisted of both the shortest duration and largest
+    output size was AFNI processing HCP with 16 subjects. While it wrote
+    approximately 100~GB of data, the controlled cluster would have had
+    approximately 44~GB of dirty cache available per OST and a maximum amount of
+    100~GB of page cache. Since all writes would not have occurred at the same
+    time and computation time was extended as a result of CPU contention, even
+    our controlled experiments do not showcase the benefits of Sea in a highly
+    data intensive scenario. However, HCP is one of the largest fMRI datasets,
+    thus the only way to augment data intensitivity of the applications is
+    through increased parallelism which is limited by the number of available
+    cores. As a result, we can only demonstrate the speedups brought by Sea when
+    Lustre performance has been deteriorated.
 
 
-    Sea may not be ideal in instances where there is a CPU bottleneck, for instance, as speculated
-    with AFNI and ds0015454 using 8 parallel processes on our local cluster. In these experiments, Sea wrote the majority of the results to tmpfs space.
-    Since the applications also require a substantial amount of memory space,
-    this may have resulted in increased CPU communication. In these cases, it
-    is likely preferred to reduce the amount of tmpfs space used by Sea and
-    favour writing to disk instead. However, in instances where Lustre
-    performance is good, we would expect a performance degradation from
-    using disk.
+    Sea cannot bring significant speedups to applications that are very compute intensive,
+    such as is the case with FSL. This is because the bottleneck is the CPU time, which Sea
+    does not address. Moreover, depending on the application's I/O patterns, it is possible
+    that there will be significant page cache space and sufficient time to flush all the
+    results asynchronously to Lustre. However, even with minimal speedups, Sea can still be
+    useful in these cases to limit the number of new files created on Lustre, which can be particularly
+    useful in instances where users have strict file limits.
 
 
     %\subsection{Sea uses more memory}
@@ -507,7 +580,7 @@ Sea and baseline executions an extensive amount. Moreover,
     Our results expose the complexities of performance predictions on a
     production cluster. We present results on a local cluster with which we have
     control over the global cluster usage and are able to demonstrate that
-    significant speedups can be obtained when all the disks associated to Lustre
+    significant speedups can be obtained when all the Lustre storage devices
     are busy writing other data concurrently. However, even these experiments
     are limited in demonstrating potential speedups with Sea as there are many
     controlled variables, some of which may vary from cluster to cluster. For
@@ -519,17 +592,16 @@ Sea and baseline executions an extensive amount. Moreover,
     factors that can affect reported results, others can include when the
     experiment were executed, what kind of applications were being executed
     alongside the experiment, scratch filesystem usage during experiments, what
-    were the application write patterns, etc.
+    were the application write patterns, etc,.
 
     As a user, we cannot control or predict the cluster status at the time of
-    our experiments. However, we can control how our applications behave. The
+    our experiments. Nevertheless, we can control how our applications behave. The
     experiments show that when parallelism is optimal (no competing threads and
     minimized compute time), we obtain speedups with Sea if Lustre performance
     is deteriorated. Otherwise, we should experience the same performance as 
     without Sea. The more data the application writes, the bigger the speedups, since what
     can be written to page cache effectively behaves similarly as using Sea to write
-    to tmpfs. This, naturally, comes with the caveat that using too much memory with
-    Sea can result in a slowdown if page cache can be used.
+    to tmpfs.
     
     Additionally, the frequency and the size of the user application I/O also
     plays an important role in determining speedups. An application which writes
@@ -552,39 +624,43 @@ Sea and baseline executions an extensive amount. Moreover,
     
     \subsection{Prefetching, flushing and eviction with Sea}
 
-    Sea provides prefetching, flushing and eviction mechanisms to further improve
-    the speedups that can be obtained with Sea. Prefetching allows input data to be moved
-    to and manipulated from memory. All of our experiments with SPM used prefetching as
-    SPM updates the input data via the use of a memory map. Without prefetching, updates
-    to the input files would have been performed directly on Lustre, thus exhibiting a
-    less important speedup. It was favorable to proceed with prefetching, in this case,
-    as the input files themselves were not large compared to available memory space. However,
-    in cases with very large input files, it may be preferable to maintain the memory map
-    to Lustre.
+    Sea provides prefetching, flushing and eviction mechanisms to further
+    improve the speedups that can be obtained with Sea. Prefetching allows input
+    data to be moved to and manipulated from memory. All of our experiments with
+    SPM used prefetching as SPM updates the input data via the use of a memory
+    map. Without prefetching, updates to the input files would have been
+    performed directly on Lustre, thus exhibiting a less important speedup. It
+    was favorable to proceed with prefetching, in this case, as the input files
+    themselves were not large compared to available memory space. However, in
+    cases with very large input files, it may be preferable to maintain the
+    memory map to Lustre.
 
     Whereas flushing and eviction were not used in the controlled experiments,
-    they were enabled for the Beluga experiments. We made the assumption, in
-    this case, that users would want access to all available intermediate data,
-    but this would likely not be the case with the processing of full datasets.
-    Thus, eviction was mostly used to ensure that files eventually deleted by the
-    pipelines would not be copied to Lustre. Since all intermediate files were
-    copied Lustre by Sea in our Beluga experiments, it is normal that speedups
-    occurred less frequently and not at the same magnitude. Additionally, slowdowns
-    experienced with Sea may be a result of flushing occurring outside of the computation.
-    We assume that in large scale analyses, users will not need access to all intermediate
-    results, leading to better usage of tmpfs and also minimized writes to Lustre. Such a
-    scenario should lead to performance results more akin to those obtained using Big Data
-    frameworks.
+    they were enabled for the Beluga experiments. We made the assumption, that 
+    users would want access to all available intermediate data,
+    although this would likely not be the case with the processing of full datasets.
+    Thus, eviction was mostly used to ensure that files eventually deleted by
+    the pipelines would not be copied to Lustre.
+    Slowdowns experienced with Sea may be a result of flushing
+    occurring outside of the computation. We assume that in large scale
+    analyses, users will not need access to all intermediate results, leading to
+    better usage of tmpfs and also minimized writes to Lustre. Such a scenario
+    should lead to performance results more akin to those obtained using Big
+    Data frameworks.
 
     \subsection{Libc interception of neuroimaging pipelines}
     
     As demonstrated by our Sea experiments, we have found that libc interception
     is effective at capturing all file system calls executed by the
-    applications. This means that Sea is compatible with some of the most prominently
-    used neuroimaging preprocessing pipelines. Although we have not tested it extensively
-    against all possible parameters and toolbox applications, we assume that use
-    of glibc within the toolboxes themselves are likely to be consistent.
-    \tristan{Mention your tests and the technical challenges involved with intercepting all libc calls}
+    applications. This means that Sea is compatible with three of the most
+    prominently used neuroimaging preprocessing pipelines. Although we have not
+    tested it extensively against all possible parameters and toolbox
+    applications, we assume that use of libc within the toolboxes themselves are
+    likely to be consistent. Despite not testing against all parameters and
+    toolbox applications, Sea has been extensively tested using many integration
+    tests on 3 different Linux operating systems (Ubuntu, CentOS and Fedora),
+    and a total of 8 different CentOS versions.
+
     The ability to use libc interception over more common alternative methods
     such as kernel-based or fuse-based filesystems was essential in ensuring
     ease-of-use and minimal performance overheads. As both our controlled and production
@@ -602,10 +678,21 @@ Sea and baseline executions an extensive amount. Moreover,
     can still shift performance results to be favourable to Sea. As we cannot guarantee performance with
     Sea, we break down this discussion from the perspective of a cluster administrator and that of a user.
 
-    From the perspective of a cluster administrator, Sea is considered useful to maintaining the global health of the system By using available local resources, Sea is able to alleviate strain on
-    globally shared cluster resources, thus improving the experience for all users. Sea is able to do this
-    through the use of eviction which ensures that data that is not required, never makes it to Lustre. Of
-    course, 
+    From the perspective of a cluster administrator, Sea is considered useful to
+    maintaining the global health of the system By using available local
+    resources, Sea is able to alleviate strain on globally shared cluster
+    resources, thus improving the experience for all users. Sea is able to do
+    this through the use of eviction which ensures that data that is not
+    required, never makes it to Lustre.
+
+
+    From the perspective of a user, Sea provides significant speedups when
+    Lustre is deteriorated and ensures limited overhead. It is most efficient
+    when the compute time and non-Lustre I/O overhead is minimal. Even in
+    instances where Sea does not improve performance, it helps reduce and ensure
+    that the number of files that make it to Lustre are the exact ones required,
+    therefore not exceeding any predetermined quota a user might have on the
+    shared file system. 
     
     %user
     
@@ -622,4 +709,21 @@ Sea and baseline executions an extensive amount. Moreover,
     
     
     %Flushing - rely on modification time
-    \section{Conclusion}
+    \section{Conclusion and Future work}
+
+    We developed a lightweight data-management library, Sea, to seamlessly
+    provide data management capabilities to existing neuroimaging workflows.
+    We have tested our library on three of the most commonly used fMRI preprocessing
+    libraries and found that Sea was able to intercept and redirect all application I/O
+    calls without issue. 
+
+    When benchmarking the performance of Sea compared the baseline (Lustre without Sea),
+    it was found that Sea provided the most significant speedups when Lustre performance was
+    deteriorated. We were able to obtain up to a 32$\times$ in the controlled environment and 11$\times$
+    in a production cluster. It was also found that speedups were greatest with a larger filesize, as long
+    as the compute time and non-Lustre I/O-related overheads were also minimal.
+
+    It is believed that Sea's benefits are not only limited to performance as users can
+    also benefit from limiting the number of files created on Lustre with Sea. It would be
+    interesting to explore the archiving of the output directory on Lustre with Sea to further
+    reduce inode usage.
