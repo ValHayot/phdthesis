@@ -17,9 +17,9 @@ Manuscript in preparation. \\
   
   In order to facilitate data management for standardized neuroimaging tools, we developped Sea, a library that intercepts
   and redirects application read and write calls to minimize data transfer time. In this paper, we investigate
-  the performance of Sea on two standard fMRI preprocessing pipelines, SPM and AFNI, using three neuroimaging datasets of different sizes
+  the performance of Sea on three standard fMRI preprocessing pipelines, FSL Feat, SPM and AFNI, using three neuroimaging datasets of different sizes
   (OpenNeuro's ds001545, PREVENT-AD and the HCP dataset) on two high-performance computing clusters. Our results demonstrate that given the features of the applications and datasets,
-  Sea provides large speedups when the shared filesystem's (e.g. Lustre) performance is deteriorated. When the shared filesystem is not overburdened by other users,
+  Sea provides large speedups when the shared filesystem's (e.g. Lustre) performance is deteriorated (up to 32$\times$). When the shared filesystem is not overburdened by other users,
   performance is unaffected by Sea, suggesting that Sea's overhead is minimal even in cases where it is not useful.
   
   \section{Introduction}\label{sec:sea_neuro:introduction}
