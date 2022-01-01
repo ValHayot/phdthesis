@@ -31,13 +31,21 @@
         for the processing of neuroimaging data.
 
         Big Data frameworks differ from those available in neuroimaging as their
-        focus is mainly on workflow composition and performance. Big Data 
-        frameworks such as Apache Spark~\cite{Zaharia:2016:ASU:3013530.2934664} 
-        and Dask~\cite{rocklin2015dask} both aim to be easy-to-use,
-        applicable to a wide variety of analyses and improve performance in the 
-        processing of Big Data. These types of systems were primarily designed 
-        to be efficient on commodity infrastructure in which transferring data
-        over a network is extremely costly.
+        focus is mainly on workflow composition and performance, primarily
+        through the minimization of data transfers. Big Data frameworks such as
+        Apache Spark~\cite{Zaharia:2016:ASU:3013530.2934664} and
+        Dask~\cite{rocklin2015dask} both aim to be easy-to-use, applicable to a
+        wide variety of analyses and improve performance in the processing of
+        Big Data. These types of systems were primarily designed to be efficient
+        on commodity infrastructure in which transferring data over a network is
+        extremely costly.
+
+        The two main data-management strategies employed by Big Data frameworks
+        are: data locality and in-memory computing. Data locality ensures that
+        the compute is moved to where the data is located, as it is faster to
+        transfer code over a network than large datasets. In-memory computing attempts
+        to maintain all intermediate data in memory, as it is the fastest available storage
+        device that can be used for storing data.
 
         Currently, there lacks a Big Data framework which is adapted for the
         processing of neuroimaging data. However, tools such as the Thunder 
@@ -65,8 +73,34 @@
         for scientific computing, it is necessary to adapt the infrastructure 
         for processing on HPC.
 
+        Another significant limitation to the adoption of Big Data frameworks is
+        the fact that existing well-established neuroimaging applications will have
+        to be entirely rewritten in another framework. Not only that, but in doing so,
+        they may lose some features that are required for scientific workflows.
 
-	This thesis aims to bring the 
+
+	This thesis aims to bring the data-management strategies of Big Data
+        Frameworks to neuroimaging. It is divided into two parts.
+        Part~\ref{part:evaluation} explores the impacts that employing Big
+        Data optimization on data-intensive neuroimaging applications can bring
+        and investigates alternative existing solutions. More specifically,
+        Chapter~\ref{chp:bigdatastrategies} investigates the performance
+        benefits data locality and in-memory computing to data-intensive
+        neuroimaging applications. Chapter~\ref{chp:spa} investigates how to
+        best schedule Apache Spark applications on HPC infrastructure.
+        Chapter~\ref{chp:optane} then looks at how improved hardware can also
+        bring similar speedups, by investigating the use of Intel Optane DC
+        Persistent Memory on data-intensive neuroimaging pipelines.
+
+        Part~\ref{part:implementation} focuses on tools designed to bring
+        data managemenent strategies to neuroimaging applications. Chapter~\ref{chp:rp}
+        discusses are implementation of Rolling Prefetch, a Python library designed to
+        prefetch data from the cloud. Chapter~\ref{chapter:sea-comp} introduces Sea, a lightweight 
+        data-management library for scientific applications executing on HPC. Chapter~\ref{chapter:sea-neuro}
+        investigates the performance brought by Sea on three standard fMRI preprocessing application.
+
+        We first commence with Chapter~\ref{chp:background} which compares the current state of scientific workflows
+        with those of Big Data.
 
         % This paper aims to evaluate the efficiency of current neuroimaging 
         % frameworks in comparison to Big Data frameworks and to determine the 

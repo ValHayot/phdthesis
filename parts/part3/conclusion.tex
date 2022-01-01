@@ -1,18 +1,52 @@
-\chapter{Conclusion}
+\chapter*{Conclusion}
 
-Our implementations significantly reduce processing time by masking data transfers within task computations.
-While they can be applied in all cases, they have been found to be most effective when data and computation are
-similar. Furthermore, we have not found either implementations to incur significant overheads.
+In this thesis, we discussed the need for data management strategies in
+neuroimaging pipelines to support the ever-growing influx of neuroimaging data.
+While many Big Data frameworks have been available for quite some time,
+neuroimaging applications are slow to adopt them because of difficulties
+employing them on infrastructure in which the pipelines are executed and having
+to rewrite standard applications entirely. Furthermore, Big Data Frameworks make
+lack some of the qualities that are highly regarded in scientific computing.
 
-One of the most important characteristics of our implementations is that they do not disrupt the methods in which pipelines
-are currently built. Rolling Prefetch allows users to continue writing pipelines in Python as they would normally, maintaining
-even the interface for interacting with S3, by being an extension above S3FS. Sea satisfies that requirement by being a preloaded
-library that intercepts libc calls. Therefore, rather than adapt their code, users simply need to execute Sea alongside their pipeline.
+We first explored the benefit that a data-intensive neuroimaging pipeline could gain
+from employing these strategies and found that it was quite significant. We then looked
+at how to adapt frameworks like Apache Spark to make their jobs easier to schedule on HPC
+and found that the implemented adaptations did not improve scheduling performance. We also
+investigated persistent memory storage as an alternative to adopting software solutions.
+While we found the hardware to provide similar performance, we found it was unlikely for it
+to be made widely available to researchers in the near future.
 
-As more and more researchers are starting to interact with diverse types of infrastructures, such as both cloud and HCP,
-it will be important to extend Sea to include functionality to interact with cloud-based storage. It could also be done In
-such a way that enable existing pipelines making POSIX calls read from file systems such as 
-S3 without instrumentation.
+Given these results, we decided the best way to provide data-management
+strategies to neuroimaging pipelines was to implement our own solutions. We had
+two main criteria to consider when designing the implementations: 1) the
+solutions had to be lightweight and 2) they did not alter or disrupt in any way
+the application features. Our first implementation, Rolling Prefetch, was to
+build a tool that minimizes application read time on the cloud by prefetching
+the data. Rolling Prefetch is an extension to the S3Fs library that allows
+Python applications to directly interact with S3 object stores. By extending an
+existing solution, Python applications that already interact with S3 need to be
+minimally adapted to function with Rolling Prefetch.
+
+Our second implementation was Sea, a lightweight data-management library for
+applications running in Linux environments. Sea is an external tool to the
+application, management data solely through the interception of application I/O
+calls. By adopting this approach, we were able to ensure that the underlying
+application would be able to function as normal without needed to make any
+changes.
+
+Our implementations were found to significantly reduce processing time by masking data
+transfers within task computations or minimizing data transfers altogether.
+While they can be applied in all cases, they
+have been found to be most effective when data and computation are similar. In the case of Sea in-memory,
+performance can be even better when data transfer time far exceeds computation time.
+Furthermore, we have not found either implementations to incur significant
+overheads.
+
+As more and more researchers are starting to interact with diverse types of
+infrastructures, such as both cloud and HCP, it will be important to extend Sea
+to include functionality to interact with cloud-based storage. It could also be
+done In such a way that enable existing pipelines making POSIX calls read from
+file systems such as S3 without instrumentation.
 
 
 

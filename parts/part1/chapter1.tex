@@ -1,6 +1,6 @@
 
     
-    \chapter{Background} 
+    \chapter{Background}~\label{chp:background} 
     \section{Current state of neuroimaging applications}
         
 
@@ -655,18 +655,18 @@
         inefficiently on resources or having to learn multiple frameworks and
         rewrite their workflows depending on the infrastructure selected.
  
-        In this Chapter, we will compare scientific workflows to Big Data
-        frameworks on the basis of performance. Section~\ref{fs} will look at
+        In this section, we will compare scientific workflows to Big Data
+        frameworks on the basis of performance. Subsection~\ref{fs} will look at
         what filesystems are supported by the engines. This is important because
         data movement of any kind is costly, and may be worse depending on the
         filesystems available. Furthermore, typical neuroinformatics pipelines
         manipulate files, and therefore, reducing the amount of I/O is
-        necessary. Section~\ref{sched} will provide an overview of the
+        necessary. Subsection~\ref{sched} will provide an overview of the
         schedulers available and their compatibility with the workflow engines.
-        Section~\ref{other} will discuss the checkpointing of data in the
-        context of scientific workflows. This chapter will conclude with a
+        subsection~\ref{other} will discuss the checkpointing of data in the
+        context of scientific workflows. This section will conclude with a
         discussion on the efficacy of Big Data frameworks for scientific
-        computing, in Section~\ref{eval}.
+        computing, in subsection~\ref{eval}.
         
  
         \subsection{Data-centric optimizations}\label{fs}
@@ -998,7 +998,7 @@
         for frameworks and their respective pipelines to be portable. Without
         portability, users are limited to executing certain frameworks only or
         dealing with the significant overhead of making these engines work on
-        the system available to them. In this chapter, we evaluate the
+        the system available to them. In this section, we evaluate the
         portability of workflows on the basis of the following three components:
         1) platform-independence, 2) tool installation and 3) execution setup.
         We also examine containerization, one of the strategies used to improve
@@ -1159,12 +1159,12 @@
         experiment within a contained environment identical to the one it that
         was originally experimented on. 
 
-        This chapter will examine how different workflow engines tackle the
-        issue of reproducibility. Section~\ref{metadata} will investigate three
+        This section will examine how different workflow engines tackle the
+        issue of reproducibility. Subsection~\ref{metadata} will investigate three
         different provenance specifications used in neuroinformatics (W3C PROV,
-        NIDM, and BIDS Derivates). Section~\ref{prov} will discuss how the
+        NIDM, and BIDS Derivates). Subsection~\ref{prov} will discuss how the
         engines assimilate and distribute the provenance data.
-        Section~\ref{repcont} will examine how these engines use containers to
+        Subsection~\ref{repcont} will examine how these engines use containers to
         facilitate reproducibility of the experiments. \subsection{Provenance
         Formats}\label{metadata} In order to improve data sharing in
         neuroscience, the derived data's provenance must be well understood by
