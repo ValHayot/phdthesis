@@ -18,7 +18,7 @@ strategies as the effort required to update the existing applications is signifi
 
 We developed Sea as a means to enable data-management strategies for scientific applications
 executing on HPC clusters
-without needing to update the underlying applications. Sea leverages libc interception to intercept
+without needing to update the underlying applications. Sea leverages GNU libc interception to intercept
 POSIX-compliant filesystem calls made by the applications. We design and performance model and
 evaluated the performance of Sea on a synthetic data-intensive application processing a representative 
 neuroimaging dataset (the Big Brain). Our results demonstrate that Sea significantly improves 
@@ -96,7 +96,7 @@ privileges to be installed and executed.
 
 This paper makes the following contributions:
 \begin{itemize}
-    \item Introduces a library, Sea, that generates a on-the-fly userspace
+    \item Introduces a library, Sea, that generates an on-the-fly user-space
     hierarchical filesystem
     \item Develops a model to describe the performance bound that can be
     obtained through the use of Sea
@@ -180,7 +180,7 @@ This paper makes the following contributions:
 
 
 
-\subsection{The linux page cache}
+\subsection{The Linux page cache}
  While scientific applications uncommonly use Big Data frameworks and must
       perform large over-the-network data transfers, they may still benefit from
       in-memory computing and data locality through the Linux Page
@@ -202,13 +202,13 @@ This paper makes the following contributions:
       requests may be throttled by the system.
 
 \subsection{File System implementations}
-      Due to the architecture of conventional HPC clusters, network based
+      Due to the architecture of conventional HPC clusters, network-based
       parallel files systems are favoured over Big Data distributed filesystems.
-      Such filesystems require super user access, preventing users from
+      Such filesystems require super-user access, preventing users from
       deploying their own own on-the-fly cluster. While HDFS can be loaded in
       user-space by mounting its File System in Userspace (FUSE) implementation,
       FUSE-based filesystems can perform significantly worse than desired,
-      depending on the application~\cite{tofuse}. Even with a userspace version
+      depending on the application~\cite{tofuse}. Even with a user-space version
       of HDFS, there would be no mechanism to transfer all the data back to the
       parallel filesystem to be accessible post resource requests. Furthermore,
       such filesystems are not POSIX-compliant, which would be required for
@@ -216,9 +216,9 @@ This paper makes the following contributions:
       
       There are, however, BigData filesystems, such as XtreemFS~\cite{xtreemfs}
       that exist entirely within user space, are POSIX-compliant, and can use
-      alternative methods to FUSE to function. XtreemFS leverages libc
-      interception using the LD\_PRELOAD trick to intercept filesystem calls
-      made to the libc library. There are limitations to using libc
+      alternative methods to FUSE to function. XtreemFS uses 
+      the LD\_PRELOAD trick to intercept filesystem calls
+      made to the GNU libc library. There are limitations to using libc
       interception. For instance, the application must be dynamically linked and
       make libc calls. However, statically-linked applications are uncommon and
       applications interacting with POSIX-compliant file systems on Linux
@@ -250,7 +250,7 @@ This paper makes the following contributions:
 
 \subsection{Sea design and implementation}
 
-Sea~\footnote{\url{https://github.com/valhayot/sea}} is an open-source user-space data-management C++ library for applications running on HPC
+Sea\footnote{\url{https://github.com/valhayot/sea}} is an open-source user-space data-management C++ library for applications running on HPC
 systems. Its main aim is to reduce application data transfer costs by leveraging
 node-local storage. Sea redirects files accessed from a user-specified mount
 point to the appropriate storage devices using libc interception. Within an
@@ -341,7 +341,7 @@ written to the best possible location at any given time. It is both pipeline and
 infrastructure agnostic.
 
 As it executes in user-space, root permissions are not required, enabling users
-to use Sea on most linux-based systems available to them. This differs from Big
+to use Sea on most Linux-based systems available to them. This differs from Big
 Data filesystems which may require elevated permissions to install. The overhead
 of intercepting libc calls is minimal, and negligible compared to system call
 interception and file systems such as FUSE.
@@ -353,7 +353,7 @@ existing pipelines, allowing users to gain an instant performance boost.
 
 Libc interception is achieved by writing wrappers to existing libc functions.
 Most importantly, every libc function accepting a file path needs to be wrapped.
-The wrappers' job is to take any input filepath that is located within the
+The wrappers take any input filepath that is located within the
 user-provided Sea mountpoint and convert it a filepath pointing to the best
 available storage device.
 
@@ -362,9 +362,9 @@ devices. Since it cannot predict the size of the outputs to ensure the existence
 of sufficient space on storage devices, the user must provide within the Sea
 configuration file the maximum file size produced by the workflow. Together with
 the specified amount of parallel processes, Sea calculates the minimum space
-required on a storage device to write the file to it
+required on a storage device to write the file to it.
 %\todo{should include an equation here}
-. Sea will then go through the hierarchy of available storage devices an select
+Sea will then go through the hierarchy of available storage devices an select
 the fastest storage device with sufficient available space. While this process
 may result in not utilizing all available space in fast storage devices, it will
 still allow users to gain a performance speedup on the pipeline given that the
@@ -373,7 +373,7 @@ number of threads multiplied by the file size does not exceed storage space.
 \subsubsection{Installation and execution}
 Users wanting to use Sea will need to compile the library via GCC (C++11) and
 Make, or use one of our pre-made containers available on
-GitHub~\footnote{\url{https://github.com/ValHayot?tab=packages&repo_name=Sea}}.
+GitHub\footnote{\url{https://github.com/ValHayot?tab=packages&repo_name=Sea}}.
 If compiling, users will need to ensure that the dependencies,
 \href{https://github.com/ndevilla/iniparser}{libiniparser} and libmagic, are
 met.
@@ -544,7 +544,7 @@ is not needed in post-processing analysis or by other nodes
 
 
       To effectively predict in which scenarios Sea will provide
-      speedup over the baseline solution, we require a model. Since different
+      speedup over the baseline solution, we require a performance model. Since different
       parallel file systems may operate differently, our baseline model will be
       based on Lustre which is commonly used on HPC infrastructure.
 
@@ -553,7 +553,7 @@ is not needed in post-processing analysis or by other nodes
       the data and the amount of time it takes to write the data. With more
       heterogeneous applications (some components are compute intensive whereas
       others are data intensive), a third component, comprising of compute time,
-      can be added. Furthermore, latency make also play a significant role
+      can be added. Furthermore, latency may also play a significant role
       application makespan, particularly in scenarios with large amounts of
       small files. We choose to ignore latency costs in our model and make the
       assumption that the application bottleneck is the bandwidth, however, for
@@ -605,7 +605,7 @@ is not needed in post-processing analysis or by other nodes
     \end{equation}
 
     The network bandwidth of the compute node can be described as the number of compute 
-    nodes available, $c$, multplied by the bandwidth of the network $N$. The network bandwidth 
+    nodes available, $c$, multiplied by the bandwidth of the network $N$. The network bandwidth 
     of the storage nodes is calculated similarly where the number of storage nodes, $s$, is
     multiplied by the network bandwidth. 
 
@@ -745,8 +745,8 @@ is not needed in post-processing analysis or by other nodes
 
       In an optimal scenario all intermediate data ($D_{m}$) and final output
       data ($D_{f}$) would fit in tmpfs. This would provide an application using
-      Sea in-memory performance. However, due to limited tmpfs storage space
-      , $t$, it is unlikely to be the case. In addition, Sea may further
+      Sea in-memory performance. However, due to limited tmpfs storage space,
+       $t$, it is unlikely to be the case. In addition, Sea may further
       restrict available storage space to prevent exceeding tmpfs storage by
       ensuring that there is at least sufficient space for $p$ processes to each
       write a file of size $F$.
@@ -1030,7 +1030,7 @@ is not needed in post-processing analysis or by other nodes
       Lustre, in this case, has very good bandwidth, having at most 6 concurrent
       writes to the whole file system. Furthermore, due to the limited number of
       concurrent writes on Lustre at any given time, Lustre needs to wait less
-      for writes to flush to disk, making better use of availabl page cache
+      for writes to flush to disk, making better use of available page cache
       space. Sea's performance, in contrast, is negatively impacted as there is
       more data being written to local storage and the combined bandwidth of the
       local storage is far less superior than that of Lustre's, due to only
@@ -1100,12 +1100,12 @@ is not needed in post-processing analysis or by other nodes
     At minimum, Sea requires the specification of a configuration file for it to work.
     A user would need to know details on the cluster storage that can be leveraged as 
     well as approximate details on how much data an application execution can produce 
-    at any given time. Due to the simplicity of the configuration file, we believe
-    Sea maintain the ease-of-use requirement for scientific applications.
+    at any given time. Due to the simplicity of the configuration file, 
+    Sea maintains the ease-of-use requirement for scientific applications.
 
     Sea maintains whole files, as produced by the pipeline. In no instance does it modify
     or alter the data produced by the pipeline. Since there is no risk of Sea modifying
-    the contents of the data, we believe Sea preserves the reproducibility requirement.
+    the contents of the data, Sea preserves the reproducibility requirement.
 
     The flush-and-evict process may affect overall application parallelism. It
     would depend on how many Sea processes are started on the compute node. If
