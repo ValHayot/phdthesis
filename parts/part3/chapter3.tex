@@ -1,11 +1,11 @@
 \chapter{Automated neuroimaging data management with Sea}\label{chapter:sea-neuro}
 
-Val\'erie Hayot-Sasson and Tristan Glatard \\
-\begingroup \footnotesize
-Department of Computer Science and Software Engineering, Concordia University, Montreal, Canada \\
-\endgroup 
-\vspace{5pt} \\
-Manuscript in preparation. \\
+% Val\'erie Hayot-Sasson and Tristan Glatard \\
+% \begingroup \footnotesize
+% Department of Computer Science and Software Engineering, Concordia University, Montreal, Canada \\
+% \endgroup 
+% \vspace{5pt} \\
+% Manuscript in preparation. \\
 
 \section{Abstract}
 
@@ -17,15 +17,15 @@ Manuscript in preparation. \\
   data-intensive processing is that they must be entirely rewritten.
   
   In order to facilitate data management for standardized neuroimaging tools, we
-  developped Sea, a library that intercepts and redirects application read and
+  developed Sea, a library that intercepts and redirects application read and
   write calls to minimize data transfer time. In this paper, we investigate the
   performance of Sea on three standard fMRI preprocessing pipelines, FSL Feat,
   SPM and AFNI, using three neuroimaging datasets of different sizes
   (OpenNeuro's ds001545, PREVENT-AD and the HCP dataset) on two high-performance
   computing clusters. Our results demonstrate that given the features of the
   applications and datasets, Sea provides large speedups when the shared
-  filesystem's (e.g. Lustre) performance is deteriorated (up to 32$\times$).
-  When the shared filesystem is not overburdened by other users, performance is
+  file system's (e.g. Lustre) performance is deteriorated (up to 32$\times$).
+  When the shared file system is not overburdened by other users, performance is
   unaffected by Sea, suggesting that Sea's overhead is minimal even in cases
   where it is not useful.
   
@@ -46,14 +46,14 @@ Manuscript in preparation. \\
     memory and local storage as a cache. While these frameworks have been used
     to process neuroimaging data~\cite{rokem2021pan,thunder,boubela2016big}, their popularity within the
     domain remains low due to the effort required to rewrite standardize
-    neuroimaging tools (e.g FSL, AFNI, SPM) for the frameworks. 
+    neuroimaging tools (e.g. FSL, AFNI, SPM) for the frameworks. 
     % Although it is possible to use the tools within the Big Data frameworks,
     % optimizations like in-memory computing would not be leveraged due to the
     % fact that neuroimaging tools are meant to be used as command-line tools
     % and do not provide interfaces that enable the data to be transferred
     % in-memory.
     
-    Frameworks used in neuroimaging, such as NiPype~\cite{nipype} and
+    Frameworks used in neuroimaging, such as Nipype~\cite{nipype} and
     Joblib~\cite{joblib} instead focus on reducing compute time of workloads via parallelization of tasks.
     %This is because even with large datasets, neuroimaging data processing
     %remains split between compute and data intensive components.
@@ -63,13 +63,17 @@ Manuscript in preparation. \\
     applications data management capabilities, the applications must interact
     with a file system that can do so.
 
-    Big Data in neuroimaging can be present in two formats: 1) very large files (e.g. BigBrain~\cite{amunts2013bigbrain}) and
-    2) small files pertaining to a population of individuals, such as those found in MRI datasets, that collectively
-    amount to a large dataset. Differences in the number and size of files result in different data transfer overheads.
-    Whereas large file I/O is predominantly impacted by the underlying storage bandwidth, small file I/O is results in a
-    significant latency overhead. Addressing both of these issues in neuroimaging is important, however, for this paper
-    we focus on fMRI datasets, which are currently more likely to experience a latency overhead. We chose to focus
-    on these types of datasets due to the number of well-established tools that process the data.
+    Big Data in neuroimaging can be present in two formats: 1) very large files
+    (e.g. BigBrain~\cite{amunts2013bigbrain}) and 2) small files pertaining to a
+    population of individuals, such as those found in MRI datasets, that
+    collectively amount to a large dataset. Differences in the number and size
+    of files result in different data transfer overheads. Whereas large file I/O
+    is predominantly impacted by the underlying storage bandwidth, small file
+    I/O is results in a significant latency overhead. Addressing both of these
+    issues in neuroimaging is important, however, for this paper we focus on
+    fMRI datasets, which are currently more likely to experience a latency
+    overhead. We chose to focus on these types of datasets due to the number of
+    well-established tools that process the data.
 
     
     %Big Data in neuroimaging can be present in two formats: 1)
@@ -89,7 +93,7 @@ Manuscript in preparation. \\
     cost-effective solution to accessing a wide array of resources for
     researchers. %In this paper, we will focus on HPC processing.
     
-    HPC systems rely on scalable network-based parallel filesystems (e.g.
+    HPC systems rely on scalable network-based parallel file systems (e.g.
     Lustre) for storage. While such file systems offer excellent performance,
     they are shared between all the users on the cluster, meaning that users
     with data-intensive applications can effectively deteriorate the performance
@@ -107,7 +111,7 @@ Manuscript in preparation. \\
     format. One method to ensure that these conditions are met is by using the
     \texttt{LD\_PRELOAD} trick. This trick is used to intercept select library
     calls and redefine their behaviour. It has been used in many projects and to
-    create lightweight versions of filesystems~\cite{xtreemfs}. 
+    create lightweight versions of file systems~\cite{xtreemfs}. 
     
     In this paper, we present Sea, a file system designed to automate data
     management of neuroimaging pipelines running on HPC systems. The goal of Sea
@@ -115,10 +119,10 @@ Manuscript in preparation. \\
     compute and data management can be achieved executed on HPC without
     significant user intervention. As a secondary goal, Sea aims to ensure the
     fair sharing of cluster usage by alleviating the impacts of heavy writers on
-    the shared file systems as a whole. 
+    the shared file systems as a whole.  
     
-    \tristan{Intro logic is good but writing could be polished}
-    \tristan{Outlining the content of the paper would be useful}
+    % \tristan{Intro logic is good but writing could be polished}
+    % \tristan{Outlining the content of the paper would be useful}
     
     
     % \section{Related Work}
@@ -130,23 +134,29 @@ Manuscript in preparation. \\
     
     \section{Materials and Methods}
     
-    \subsection{The Sea filesystem}
+    \subsection{Sea}
     
-    The Sea file system is an on-demand file system that leverages the \texttt{LD\_PRELOAD} trick to intercept POSIX file system (more specifically, the GNU C library, glibc)
-    calls on Linux systems. This enables Sea to redirect write calls aimed for a slower storage device to a faster device whenever
-    possible. Similarly, when intercepting read calls, Sea can choose to read from a faster device if a copy is available on that device.
-    Sea decides which storage location it can write to based on the detailed provided in an initialization file called \texttt{sea.ini}. 
-    This file informs Sea of which locations it can use to read and write to, and well as their order of priority.
+    The Sea is a data-management library that leverages the \texttt{LD\_PRELOAD}
+    trick to intercept POSIX file system (more specifically, the GNU C library,
+    glibc) calls on Linux systems. This enables Sea to redirect write calls
+    aimed for a slower storage device to a faster device whenever possible.
+    Similarly, when intercepting read calls, Sea can choose to read from a
+    faster device if a copy is available on that device. Sea decides which
+    storage location it can write to based on the detailed provided in an
+    initialization file called \texttt{sea.ini}. This file informs Sea of which
+    locations it can use to read and write to, and well as their order of
+    priority.
 
-    We define all locations in which Sea can redirect writes to as a cache. Such caches include any available
-    storage located on the compute nodes, such as tmpfs or SSDs. 
+    We define all locations in which Sea can redirect writes to as a cache. Such
+    caches include any available storage located on the compute nodes, such as
+    tmpfs or SSDs. 
 
     As neuroimaging pipeline results are typically required post-processing and
     HPC compute-local resources are only accessible during the reserved
     duration, Sea provides functionality to flush and evict data to persistent
     shared storage. This is accomplished via a separate thread (known as the
     ``flusher'') that moves data from the caches to long-term storage. A
-    separate thread is used, in this case, to avoid interrupting on-going
+    separate thread is used, in this case, to avoid interrupting ongoing
     processing with data management operations. Users must inform Sea of files
     that need to be persisted to storage within a file called
     \texttt{.sea\_flushlist}, and temporary files which can be removed from
@@ -177,34 +187,46 @@ Manuscript in preparation. \\
     
     \subsection{Performance analysis of Sea for fMRI preprocessing}
     
-    To determine the performance gain Sea brings to neuroimaging analyses, we must evaluate the value of Sea on a variety of neuroimaging
-    applications. For our analysis, we selected different fMRI preprocessing applications as fMRI processing has some of the most
-    well-established tools for neuroimaging and some of the largest datasets. Of course, different modalities and tools may result in
-    vastly different data access patterns and compute times, we use fMRI prepreprocessing as our baseline for the benefits that can be
+    To determine the performance gain Sea brings to neuroimaging analyses, we
+    must evaluate the value of Sea on a variety of neuroimaging applications.
+    For our analysis, we selected different fMRI preprocessing applications as
+    fMRI processing has some of the most well-established tools for neuroimaging
+    and some of the largest datasets. Of course, different modalities and tools
+    may result in vastly different data access patterns and compute times, we
+    use fMRI pre-processing as our baseline for the benefits that can be
     obtained with Sea. 
     
     \subsubsection{Datasets}
-    fMRI datasets may vary greatly in total number
-    of images and number of volumes within each image. To adequately capture the 
-    diversity of datasets and the applicability of Sea, we have selected three datasets of varying
-    time and space resolutions (Table~\ref{table:sea-neuro:data}): 1) OpenNeuro's ds001545 dataset~\cite{ds001545},
-    2) the PREVENT-AD dataset~\cite{preventad}, and 3) the HCP dataset~\cite{HCP}.
-    The ds001545 dataset is a total of \SI{46}{\giga\byte} (1,778 files) and consists of data collected
-    from 30 participants in a single session watching 3 different clips (i.e. three runs/participants) of the The Grand Budapest Hotel.
+    fMRI datasets may vary greatly in total number of images and number of
+    volumes within each image. To adequately capture the diversity of datasets
+    and the applicability of Sea, we have selected three datasets of varying
+    time and space resolutions (Table~\ref{table:sea-neuro:data}): 1)
+    OpenNeuro's ds001545 dataset~\cite{ds001545}, 2) the PREVENT-AD
+    dataset~\cite{preventad}, and 3) the HCP dataset~\cite{HCP}. The ds001545
+    dataset is a total of \SI{46}{\giga\byte} (1,778 files) and consists of data
+    collected from 30 participants in a single session watching 3 different
+    clips (i.e. three runs/participants) of The Grand Budapest Hotel.
     
     
-    The PREVENT-AD dataset is an open dataset comprising of data from 330 participants with a familial history
-    of Alzheimer's Disease.
-    At the time of the experiments, the dataset contained \SI{255}{\giga\byte} (53,061 files) originating from the 308 subjects available on DataLad~\cite{halchenko2021datalad}.
+    The PREVENT-AD dataset is an open dataset consisting of data from 330
+    participants with a familial history of Alzheimer's Disease. At the time of
+    the experiments, the dataset contained \SI{255}{\giga\byte} (53,061 files)
+    originating from the 308 subjects available on
+    DataLad~\cite{halchenko2021datalad}.
     
-    The HCP project, whose aim is to characterize brain connectivity using data collected from 1,200 subjects, is the largest of the three datasets.
-    At the time of our experimments, the dataset obtained consisted \SI{85}{\tera\byte} (15,716,060 files) of data collected from 1,113 subjects.
+    The HCP project, whose aim is to characterize brain connectivity using data
+    collected from 1,200 subjects, is the largest of the three datasets. At the
+    time of our experiments, the dataset obtained consisted \SI{85}{\tera\byte}
+    (15,716,060 files) of data collected from 1,113 subjects.
     
-    By experimenting with datasets of different spatial and temporal resolutions, the amount of compute may be affected.
-    Naturally, with more data there may inevitably be more computations performed, but also, the code itself may
-    perform entirely different computations as a result of differences in resolution. Moreover, parallelism and program I/O behaviour
-    may be impacted depending on the particular characteristics of the data. Capturing this potential
-    variety in processing will provide us with a better understanding of when and where Sea can be useful.
+    By experimenting with datasets of different spatial and temporal
+    resolutions, the amount of compute may be affected. Naturally, with more
+    data there may inevitably be more computations performed, but also, the code
+    itself may perform entirely different computations as a result of
+    differences in resolution. Moreover, parallelism and program I/O behaviour
+    may be impacted depending on the particular characteristics of the data.
+    Capturing this potential variety in processing will provide us with a better
+    understanding of when and where Sea can be useful.
     
     \begin{table*}[t]
       \small\centering
@@ -230,8 +252,9 @@ Manuscript in preparation. \\
       \hline
     \end{tabular}}
     \footnotesize{*Number estimated based on data we had access to}\\
-    \caption{Dataset characteristics. Compressed size is listed as all applications, with the exception of SPM, processed
-    compressed data}\label{table:sea-neuro:data}
+    \caption{Dataset characteristics. Compressed size is listed, since all
+    applications, except for SPM, processed compressed
+    data}\label{table:sea-neuro:data}
     \end{table*}
     
     %just for example run
@@ -248,27 +271,39 @@ Manuscript in preparation. \\
     %# files written and output size, duration and memory consumption.
     \subsubsection{fMRI Preprocessing Pipelines}
     
-    Similarly to datasets, preprocessing pipelines can also vary in duration as a result of methodological differences.
-    Thus, we preprocessed each dataset using three standard preprocessing pipelines using FSL~\cite{fsl}, AFNI~\cite{cox1996afni}, and
-    SPM~\cite{spm} respectively. Table~\ref{table:seaneuro:pipelines} provides a reference of the differences in computation and data-intensivity
-    of the different pipelines on a single subject for all three of the datasets.
+    Similarly to datasets, preprocessing pipelines can also vary in duration as
+    a result of methodological differences. Thus, we preprocessed each dataset
+    using three standard preprocessing pipelines using FSL~\cite{fsl},
+    AFNI~\cite{cox1996afni}, and SPM~\cite{spm} respectively.
+    Table~\ref{table:seaneuro:pipelines} provides a reference of the differences
+    in computation and data-intensiveness of the different pipelines on a single
+    subject for all three of the datasets.
     
-    Each tool was set to only run the preprocessing pipeline. Scripts used to execute each pipeline can be found at~\url{github.com/valhayot/sea-slurm-scripts}.
+    Each tool was set to only run the preprocessing pipeline. Scripts used to
+    execute each pipeline can be found
+    at~\url{github.com/valhayot/sea-slurm-scripts}.
     
-    For the FSL preprocessing pipeline, we used FEAT configured with the many of the default parameters. We set the following parameters: slice-timing correction (interleaved) , 
-    intensity normalization and non-linear registration to standard space. FSL version 6.0.4 was used.
+    For the FSL preprocessing pipeline, we used FEAT configured with the many of
+    the default parameters. We set the following parameters: slice-timing
+    correction (interleaved) , intensity normalization and non-linear
+    registration to standard space. FSL version 6.0.4 was used.
     
     %% Add SPM here
-    To preprocess the datasets with SPM12, we reused the template described in \cite{haitas2021age}, with fieldmap correction removed.
-    As the template was designed for a specific dataset, we updated the paths to the fMRI and anatomical images,
-    as well as the dimensions, such as the number of volumes and slices and the TR and TA, for each dataset. Furthermore,
-    we set the slice order to interleaved in all cases. 
+    To preprocess the datasets with SPM12, we reused the template described in
+    \cite{haitas2021age}, with fieldmap correction removed. As the template was
+    designed for a specific dataset, we updated the paths to the fMRI and
+    anatomical images, as well as the dimensions, such as the number of volumes
+    and slices and the TR and TA, for each dataset. Furthermore, we set the
+    slice order to interleaved in all cases. 
     
-    For AFNI preprocessing, the pipeline was configured to perform slice timing, alignment to Talaraich space, registration, smoothing
-    and brain masking. While AFNI does have some parallelized components that can be controlled via environment variables, we chose to let 
-    the pipeline use as much parallelism as required for its execution. AFNI version 21.1.02 was used.
+    For AFNI preprocessing, the pipeline was configured to perform slice timing,
+    alignment to Talaraich space, registration, smoothing and brain masking.
+    While AFNI does have some parallelized components that can be controlled via
+    environment variables, we chose to let the pipeline use as much parallelism
+    as required for its execution. AFNI version 21.1.02 was used.
 
-    All the application Dockerfiles with Sea pre-installed are available at~\url{https://github.com/ValHayot/Sea/tree/master/containers/applications}.
+    All the application Dockerfiles with Sea pre-installed are available
+    at~\url{https://github.com/ValHayot/Sea/tree/master/containers/applications}.
     
     % We set fMRIPrep to run with \texttt{--fs-no-reconall} flag set and set the \texttt{--bids\-database-dir} to a tmpfs location. 
     % Furthermore, the seeds were fixed to ensure reproducible results. Unlike the other tools where only a single fMRI image was preprocessed
@@ -306,8 +341,7 @@ Manuscript in preparation. \\
     their output results, incorrect parameter selection and resulting outputs
     may result in I/O patterns that would not be observed had the pipeline been
     executed properly.
-    
-    
+   
     To validate that the outputs produced were sufficiently correct, we
     performed visual quality control of the pre-processed images to ensure
     that they were correctly skull-stripped and registered to the template
@@ -320,12 +354,12 @@ Manuscript in preparation. \\
     
     \subsection{Infrastructure}
     
-    Our experiments were exected on two different clusters: 1) a local cluster
-    and 2) Compute Canada's Beluga cluster. The local cluster was comprised of 8
+    Our experiments were executed on two different clusters: 1) a local cluster
+    and 2) Compute Canada's Beluga cluster. The local cluster was composed of 8
     compute nodes with \SI{256}{\gibi\byte} memory and \SI{125}{\gibi\byte}
     tmpfs, running Centos 8.1.1911.
     
-    Storage on the local cluster was comprised of 4 Lustre ZFS storage nodes
+    Storage on the local cluster consisted of 4 Lustre ZFS storage nodes
     with 44 HDD object storage targets (OSTs) and 1 metadata server  (MDS) with
     a single metadata target (MDT). The storage nodes were connected to the
     compute nodes via a 20Gbps ethernet connection. The cluster's hardware was
@@ -335,13 +369,13 @@ Manuscript in preparation. \\
     used up to 16 general compute nodes at a time with \SI{186}{\gibi\byte} of
     available memory, \SI{480}{\gibi\byte} of local scratch SSD space, 2 Intel Gold
     6148 Skylake @ 2.4 GHz CPUs and Centos 7 installed. Each compute node was
-    connected to the Lustre scratch filesystem via an Mellanox Infiniband EDR
-    (100 Gbps) network interconnect. The Lustre scratch filesystem consists of a
+    connected to the Lustre scratch file system via an Mellanox Infiniband EDR
+    (100 Gbps) network interconnect. The Lustre scratch file system consists of a
     total \SI{2.6}{\pebi\byte} of space, with 38 OSTs of \SI{69.8}{\tebi\byte}
     each and two MDTs of \SI{3.3}{\tebi\byte}.
 
     In our controlled local cluster, we ran the experiments with and without
-    Lustre deteriation, which we refer to as busy writers. Without busy writers,
+    Lustre deterioration, which we refer to as busy writers. Without busy writers,
     the fMRI preprocessing pipelines have exclusive access to the cluster. With
     busy writers, the fMRI preprocessing pipelines are executed alongside a
     Spark application that reads and writes approximately 1000$\times$ 617~MB
@@ -530,7 +564,7 @@ due to Sea's initial reading of the data from Lustre.
     Our results show that the speedups obtained from
     using Sea can be quite substantial (up to 32$\times$)
     depending on the deterioration of the Lustre
-    filesystem. Our best results on a production cluster were found to be
+    file system. Our best results on a production cluster were found to be
     11$\times$.
 
     While in the average case on Beluga, Sea and Baseline performed similarly, it is
@@ -546,7 +580,7 @@ due to Sea's initial reading of the data from Lustre.
     Although Sea did result in performance deterioration at times, the
     magnitude of deterioration is significantly less than that of possible
     speedups obtained. Our controlled experiments demonstrate that using
-    Sea with a deteriorated Lustre filesystem can result in average
+    Sea with a deteriorated Lustre file system can result in average
     speedups of up to 2.5$\times$. Such results indicate that the risk of a
     slowdown with Sea are less important that the potential speedups that
     can arise.
@@ -563,8 +597,8 @@ due to Sea's initial reading of the data from Lustre.
     100~GB of page cache. Since all writes would not have occurred at the same
     time and computation time was extended as a result of CPU contention, even
     our controlled experiments do not showcase the benefits of Sea in a highly
-    data intensive scenario. However, HCP is one of the largest fMRI datasets,
-    thus the only way to augment data intensitivity of the applications is
+    data-intensive scenario. However, HCP is one of the largest fMRI datasets,
+    thus the only way to augment data intensiveness of the applications is
     through increased parallelism which is limited by the number of available
     cores. As a result, we can only demonstrate the speedups brought by Sea when
     Lustre performance has been deteriorated.
@@ -598,8 +632,8 @@ due to Sea's initial reading of the data from Lustre.
     nodes and 44 disks associated to Lustre. However, these are not the only
     factors that can affect reported results, others can include when the
     experiment were executed, what kind of applications were being executed
-    alongside the experiment, scratch filesystem usage during experiments, what
-    were the application write patterns, etc,.
+    alongside the experiment, scratch file system usage during experiments, and what
+    were the application write patterns.
 
     As a user, we cannot control or predict the cluster status at the time of
     our experiments. Nevertheless, we can control how our applications behave. The
@@ -669,7 +703,7 @@ due to Sea's initial reading of the data from Lustre.
     and a total of 8 different CentOS versions.
 
     The ability to use libc interception over more common alternative methods
-    such as kernel-based or fuse-based filesystems was essential in ensuring
+    such as kernel-based or fuse-based file systems was essential in ensuring
     ease-of-use and minimal performance overheads. As both our controlled and production
     environment experiments demonstrate, Sea's overhead is minimal and the magnitude of the
     speedups to be gained by the use of Sea is significantly greater than the magnitude of the
@@ -680,9 +714,9 @@ due to Sea's initial reading of the data from Lustre.
     \subsection{Should Sea always be used ?}
     
     Our results show that performance with Sea is generally hard to predict as users do not have control
-    over the variables outside of the application they are executing. We have previously discussed the
-    conditions in which Sea may not be favourable to use, however, differences in the execution environment
-    can still shift performance results to be favourable to Sea. As we cannot guarantee performance with
+    over the variables outside the application they are executing. We have previously discussed the
+    conditions in which Sea may not be favorable to use, however, differences in the execution environment
+    can still shift performance results to be favorable to Sea. As we cannot guarantee performance with
     Sea, we break down this discussion from the perspective of a cluster administrator and that of a user.
 
     From the perspective of a cluster administrator, Sea is considered useful to
@@ -731,6 +765,5 @@ due to Sea's initial reading of the data from Lustre.
     as the compute time and non-Lustre I/O-related overheads were also minimal.
 
     It is believed that Sea's benefits are not only limited to performance as users can
-    also benefit from limiting the number of files created on Lustre with Sea. It would be
-    interesting to explore the archiving of the output directory on Lustre with Sea to further
-    reduce inode usage.
+    also benefit from limiting the number of files created on Lustre with Sea. Archiving of the output 
+    directory on Lustre with Sea to further reduce number of files may be an interesting addition to Sea.
