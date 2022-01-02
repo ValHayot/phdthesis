@@ -177,7 +177,7 @@
             for processing. However, with the advent of big data, data-intensive
             workflows are now beginning to become more present on HPC systems.
             Since the schedulers and workflow engines made for HPC systems are
-            'data-unaware', they are not efficient with the processing of Big
+            ``data-unaware'', they are not efficient with the processing of Big
             Data
 
             HPC and Big Data infrastructure differ in many ways. We define HPC
@@ -229,8 +229,8 @@
             workflows typically read and write to a shared file system at each
             workflow step. This is less of an issue in HPC infrastructure as
             network bandwidth is typically better than on commodity
-            infrastructure. In contrasts, Big Data framework typically rely on
-            there being some form of local storage. Employing a Big Data
+            infrastructure. In contrast, Big Data frameworks typically rely on
+            some form of local storage. Employing a Big Data
             framework on HPC infrastructure may in turn result in less to no
             data locality -- a strategy employed by Big Data frameworks to
             minimize data movement across the network. Due to the variability in
@@ -264,7 +264,7 @@
         %we might want to explicit this further in the paper but good enough for
         %now}}.
 
-        In this Section, we will compare and contrast the workflow composition
+        In this section, we will compare and contrast the workflow composition
         of seven neuroimaging frameworks (SPM, LONI, Nipype, PSOM, FastR, AA and
         Pydpiper), seven scientific workflow engines stemming from other fields
         (Taverna, Pegasus, Make, OpenMOLE, Nextflow, Galaxy, Toil), and three
@@ -950,7 +950,6 @@
             happen and individual neuroimaging tasks may take a non-negligable  
             amount of time to execute, a mechanism to checkpoint workflows      
             will need to be added to any Big Data framework used for
-            
             neuroinformatics.                                                   
             %\note{dont know how Taverna, Pegasus, Galaxy or Toil achieves this}
             %\note{openMole says it checks to see if outputs exist. similar to
@@ -976,7 +975,6 @@
             As scientific, specifically neuroimaging workflows are typically    
             comprised of long tasks, it                                         
             is crucial that Big Data frameworks scale well with tasks of longer
-            
             durations.
     
             To determine how different Big Data frameworks compare in their
