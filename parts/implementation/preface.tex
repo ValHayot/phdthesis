@@ -1,4 +1,4 @@
-\part{Implementing Data Managment Tools for Neuroimaging pipelines}~\label{part:implementation}
+\part{Implementing Data Management Tools for Neuroimaging pipelines}~\label{part:implementation}
 \section*{Preface}
 
 Neuroimaging pipelines processing large amounts of data may inevitably incur
@@ -35,13 +35,13 @@ benchmarking Sea's performance against that of Lustre's on 3 of the most
 popularly used fMRI preprocessing workflows.
 
 While neither of the aforementioned implementations exhibit any characteristics
-that limit them to be solely-used in neuroimaging, the are implemented in a way
+that limit them to be solely-used in neuroimaging, they are implemented in a manner
 that keeps the neuroimaging context in mind. For instance, the solution is not
 to use Big Data Frameworks because neuroimaging tools would need to be
-rewritten. We avoid the use of Big Data filesystems, such as HDFS, as they are
+rewritten. We avoid the use of Big Data file systems, such as HDFS, as they are
 not realistic to HPC environments where access to compute nodes is restricted.
 Any pre-existing file system which requires root permissions to be installed is
 avoided as we want our tools to be user-installable. Furthermore, user-space
-file systems which can exhibit significant overheads, such as FUSE filesystems,
-are equally avoided as we do not want the overheads to outweight any possible
+file systems which can exhibit significant overheads, such as FUSE file systems,
+are equally avoided as we do not want the overheads to outweigh any possible
 benefits.

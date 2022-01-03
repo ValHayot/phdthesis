@@ -179,7 +179,7 @@ located on Amazon S3. To offset the cost of latency on S3, \sfs leverages the
 on-demand caching mechanisms provided by FSSpec.
 
 Unlike \sfs which has distinct data transfer and compute phases, prefetched data
-transfers happen concurrently with compute (Figure~\ref{fig:prefetch}). In both
+transfers happen concurrently with compute (Figure~\ref{fig:rp:prefetch}). In both
 cases, data is transferred from cloud storage in blocks of configurable size.
 While local I/O overheads occur during prefetch, the resulting overhead is in
 general minimal since memory disks are expected to be used for this purpose.
@@ -194,11 +194,11 @@ instead of \texttt{S3FileSystem}.
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=\columnwidth]{figures/part3-chp1/prefetch_diagram.pdf}
+\includegraphics[width=\columnwidth]{figures/rp/prefetch_diagram.pdf}
 \end{center}
 \caption{Prefetching vs sequential transfers (\sfs)}
 %https://docs.google.com/drawings/d/1MV5dIdLyBrM_HJX-0jOsIKf90UD8wXE_G5Cnmd-mY-A/edit
-\label{fig:prefetch}
+\label{fig:rp:prefetch}
 \end{figure}
 
 \subsection{Algorithm}
@@ -255,7 +255,7 @@ The reading thread is triggered by the application to read data directly from
 cache or to wait until it is prefetched, if not found in the cache.
 %(Algorithm~\ref{alg:read}).
 By waiting for the data to be cached, we ensure that performance is comparable
-to \sfs in a worst case scenario. Furthermore, as all data reads are considered
+to \sfs in the worst case scenario. Furthermore, as all data reads are considered
 to be sequential, if the current block is not in memory then it is the current
 block being prefetched. Whenever a prefetched block has been read fully, it is
 up to the read function to flag it for deletion.
@@ -267,7 +267,7 @@ up to the read function to flag it for deletion.
 
 Throughout the lifetime of the application, the prefetching thread continuously
 requests blocks from cloud storage, so long as there remain blocks that have not
-been prefetched (Algorithm~\ref{alg:prefetch}). Each block will be written to an
+been prefetched (Algorithm~\ref{alg:rp:prefetch}). Each block will be written to an
 appropriate cache location while not exceeding user-defined space limits.
 
 Initially, the \texttt{used} variable for all cache locations is set to zero and
@@ -280,7 +280,7 @@ of the status of the main thread. Within the loop, the algorithm iterates
 between all available cache locations in priority order. The amount of available
 storage space remaining is computed, and if it is insufficient to write the next
 block, the algorithm iterates through the file list $total\_files$
-($verify\_used()$) and queries the filesystem to determine which blocks have
+($verify\_used()$) and queries the file system to determine which blocks have
 been evicted. Based on how many blocks have been removed, we can update the
 amount of used space, and by extension, the amount of available space. Should
 sufficient space be released, the next block is fetched from cloud storage and
@@ -307,7 +307,7 @@ $available < blocksize$}{ $available \gets verify\_used()$\; } \If{ $available
 } } \If{$total\_size \leq offset$ or $file\_index + 1 < total\_files$}{
 $file\_index \gets file\_index + 1$\; $total\_size \gets
 sizeof(total\_files[file\_index])$\; } \ElseIf{$total\_size \leq offset$}{
-break; } } \caption{Prefetching}\label{alg:prefetch}
+break; } } \caption{Prefetching}\label{alg:rp:prefetch}
 \end{algorithm2e}
 
 
@@ -322,7 +322,7 @@ has completed processing. %(Algorithm~\ref{alg:eviction}).
 To avoid additional costs caused by continuously querying the filesystem to
 determine which files can be evicted, we determine the names of all the blocks
 that should be evicted ($get\_all\_blocks$), and verify whether they exist in
-the filesystem at time of removal. We then update the list to ensure that we do
+the file system at time of removal. We then update the list to ensure that we do
 not attempt to remove this file more than once. Between each loop, we sleep for
 5 seconds to ensure that sufficient time has elapsed between evictions.
 
@@ -357,7 +357,7 @@ terminating.
 \subsection{Performance analysis}
 
 We consider the cost of processing a file using sequential transfers (\sfs) to
-be the sum of three components (Equation~\ref{eq:s3fs}): 1) latency-associated
+be the sum of three components (Equation~\ref{eq:rp:s3fs}): 1) latency-associated
 costs, 2) bandwidth-associated costs and 3) application compute time. The cost
 of latency is experienced every time a chunk of data is requested from cloud
 storage. That is, if we read a full file in a single call to cloud storage, we
@@ -371,14 +371,14 @@ neuroimaging.
 
     \begin{equation}
 T_{\mathrm{seq}} = n_{b}l_c + \frac{f}{b_{cr}} +  cf,
-\label{eq:s3fs}
+\label{eq:rp:s3fs}
 \end{equation}
 where $n_{b}$ is the number of data blocks, $f$ is the total size of the file to
 transfer, $l_c$ is the cloud latency, $b_{cr}$ is the cloud read bandwidth, and
 $c$ is the compute time per byte consumed.
 
-Rolling Prefetch contrasts Equation~\ref{eq:s3fs} in that the compute and data
-transfer times mask one another (Equation~\ref{eq:prefetch}). However, Rolling
+Rolling Prefetch contrasts Equation~\ref{eq:rp:s3fs} in that the compute and data
+transfer times mask one another (Equation~\ref{eq:rp:prefetch}). However, Rolling
 Prefetch has a slightly higher performance penalty than that of sequential
 transfers when there is no compute, due to reading and writing the data to local
 storage. Furthermore, we must consider the initial read from cloud storage,
@@ -386,7 +386,7 @@ where no compute can occur concurrently, and the last compute, where no data
 transfer can occur concurrently.
 
 \begin{equation}
-T_{\mathrm{pf}} = T_{\mathrm{cloud}} + (n_b-1)\max\left(T_{\mathrm{cloud}}, T_{\mathrm{comp}}\right) + T_{\mathrm{comp}} \label{eq:prefetch}
+T_{\mathrm{pf}} = T_{\mathrm{cloud}} + (n_b-1)\max\left(T_{\mathrm{cloud}}, T_{\mathrm{comp}}\right) + T_{\mathrm{comp}} \label{eq:rp:prefetch}
 \end{equation}
 where $T_{\mathrm{cloud}}$ is the time to download a block from the cloud and
 write it to local storage, and $T_{\mathrm{comp}}$ is the time to read a block
@@ -410,7 +410,7 @@ and therefore the speed-up provided by Rolling Prefetch compared to sequential
 transfers is:
 \begin{equation}
 S=\frac{T_{\mathrm{seq}}}{T_{\mathrm{pf}}}=1+(n_b-1)\frac{\min\left(T_{\mathrm{cloud}},T_{\mathrm{comp}}\right)}{T_{\mathrm{pf}}} < 2 
-\label{eq:speed-up}
+\label{eq:rp:speed-up}
 \end{equation}
 Rolling Prefetch is therefore expected to provide a speed-up of at most 2x. This
 upper bound is approached when $T_{\mathrm{cloud}} \approx T_{\mathrm{comp}}$,
@@ -521,22 +521,22 @@ storage class.
 % \tristan{I moved the nibabel text here, it could be summarized in 1 paragraph}
 % \ariel{ I revised the nibabel section into one paragraph. Below in comments is
 % the original as I found it:}
- Each \texttt{.trk} file is comprised of a 1,000-byte header and a body of
+ Each \texttt{.trk} file consists of a 1,000-byte header and a body of
 variable length consisting of a series of streamlines. Each streamline section
 contains \SI{4}{\byte} that denote the number of points in the streamline,
 followed by a series of floating point values detailing each coordinate and ends
 with a series of values representing properties of the streamline. We used
-Nibabel, a Python library that reads and writes  neuroscience-specific data
-formats, to read these files. For \texttt{.trk} files, Nibabel can return
+NiBabel, a Python library that reads and writes  neuroscience-specific data
+formats, to read these files. For \texttt{.trk} files, NiBabel can return
 individual data points via a generator. This is known as ``lazy loading'' and
 can be turned on or off prior to reading the file. As a result of the data
-representation format in \texttt{.trk} files, Nibabel reads may incur
+representation format in \texttt{.trk} files, NiBabel reads may incur
 significant overhead: because it issues a total of three read calls for each
 streamline in the file.
 % , some of which can be very small, depending on the streamline.
 In addition, an affine transform is stored together with the data, and used to
 bring coordinates from different measurements into register. For example, when
-Nibabel reads \texttt{.trk} files it automatically applies an affine
+NiBabel reads \texttt{.trk} files it automatically applies an affine
 transformation to the coordinates of each streamline stored in the file. This
 means that some amount of compute is always executed when data is read from
 file.
@@ -580,14 +580,14 @@ file.
 To evaluate the performance Rolling Prefetch, we conducted four experiments: 1)
 varying the number of files; 2) varying the blocksize; 3) parallel processing of
 files;  and 4) neuroimaging use-cases. For experiments 1-3, the pipeline
-consisted of reading the file with Nibabel. As Nibabel performs a minimal amount
+consisted of reading the file with NiBabel. As NiBabel performs a minimal amount
 of computing, Rolling Prefetch is believed to have an effect even here.
 Additional compute required by real analysis should only increase the benefit of
 using prefetching.
 % For all experiments we are using tractography files belonging to the HYDI
 % dataset stored on S3.
 
-\subsubsection{Varying the number of files}\label{exp:files}
+\subsubsection{Varying the number of files}\label{exp:rp:files}
 
 We vary the number of \texttt{.trk} files read to determine when Rolling
 Prefetch will be favourable relative to \sfs. We expect that for small amount of
@@ -601,7 +601,7 @@ larger files, there will be more computation occurring during the reads, and
 therefore, more opportunities to mask the data transfers within the compute.
 
 We benchmarked the time it took to lazily read 1, 5, 10, 15, 20 and 25 files and
-extract the streamlines in Nibabel. The total data size for each of the file
+extract the streamlines in NiBabel. The total data size for each of the file
 increments are 1.1, 5.8, 11.9, 18.0, 24.2 and \SI{31.2}{\gibi\byte},
 respectively. The blocksize was set to \SI{64}{\mebi\byte} and the prefetch
 storage was located on \texttt{tmpfs} with a limit of \SI{2}{\gibi\byte} of
@@ -616,7 +616,7 @@ the runtime to decrease to a minimum, and then increase linearly with $n_b$.
 
 
 Block sizes of 8, 16, 32, 64, 128, 256, 512, 1024, and \SI{2048}{\mebi\byte}
-were used to load the files into Nibabel and extract the streamlines.
+were used to load the files into NiBabel and extract the streamlines.
 % We suspect that \SI{8}{\mebi\byte} may be too small to have many computes
 % spanning more than a single block, however, it will occur at a higher
 % frequency then with larger blocks.
@@ -628,7 +628,7 @@ prefetch.
 Five files pertaining to the HYDI dataset were used to generate the results.
 These files ranged from \SI{793}{\mebi\byte} to \SI{1.5}{\gibi\byte} in size
 each. Since only Rolling Prefetch is capable of treating a list of files as a
-single file, a new Nibabel object needed to be created for each file in the case
+single file, a new NiBabel object needed to be created for each file in the case
 of \sfs.
 
 The experiment was executed on both \sfs and Rolling Prefetch for each block and
@@ -636,7 +636,7 @@ repeated 10 times. Prefetched storage was set to be \texttt{tmpfs} and
 configured to have \SI{2}{\gibi\byte} of available space such that the largest
 block size could fit in prefetch storage.
 
-\subsubsection{Parallel processing}\label{exp:parallel}
+\subsubsection{Parallel processing}\label{exp:rp:parallel}
 
 Since perceived throughput may be affected by the number of threads used, we
 aimed to determine if the performance difference between \sfs and Rolling
@@ -654,11 +654,11 @@ expected to be reduced significantly with the addition of multiple threads.
 We used a total of four parallel processes to evaluate the effects of parallel
 processing. We increased the number of files per thread between each condition
 from 1-20, with the last condition loading a total of \SI{108}{\gibi\byte} into
-Nibabel. The blocksize was set to \SI{64}{\mebi\byte} and we set the prefetch
+NiBabel. The blocksize was set to \SI{64}{\mebi\byte} and we set the prefetch
 storage location to be on \texttt{tmpfs}, with a limit of \SI{1}{\gibi\byte} of
 storage per process. 10 repetitions were performed.
 
-\subsubsection{Neuroimaging use cases}\label{exp:4} Our previous experiments
+\subsubsection{Neuroimaging use cases}\label{exp:rp:4} Our previous experiments
 evaluate the value of Rolling Prefetch when the application performs the most
 basic and necessary action: converting the data from binary to array
 representation.
@@ -715,10 +715,10 @@ application. For instance, recognition was executed on two different compute
 instances (c5.9xlarge and r5.4xlarge). The experiment executed on the c5.9xlarge
 instance consisted of a \SI{1}{\gibi\byte} file with a \SI{64}{\mebi\byte}
 blocksize, whereas the experiment executed on the r5.4xlarge instance used 10
-files totalling \SI{12}{\gibi\byte} and was configured to use a
+files totaling \SI{12}{\gibi\byte} and was configured to use a
 \SI{32}{\mebi\byte} blocksize. 
 
-The histogram experiment was executed on an r5.4xlarge instance with a
+The histogram experiment was executed on a r5.4xlarge instance with a
 \SI{1}{\gibi\byte} file from the HYDI dataset and used a \SI{32}{\mebi\byte}
 blocksize.
 
@@ -746,11 +746,11 @@ vCPUs and \SI{16}{\gibi\byte} of RAM with a maximum of \SI{7.8}{\gibi\byte} of
 RAM of \texttt{tmpfs} space. The compute instance was configured to use Red Hat
 Enterprise Linux 8.3 with kernel version 4.18.0. This instance was hosted in
 availability zone \texttt{us-west-2a}. The experiments all used Python version
-3.9.0 with version 0.5.2 of \sfs and Nibabel version 3.2.1.
+3.9.0 with version 0.5.2 of \sfs and NiBabel version 3.2.1.
 
 The scientific applications required significantly more memory than available on
 t2.xlarge instances. As a result, they were executed on a c5.9xlarge instance
-and an r5.4xlarge configured identically to the t2.xlarge instance, but located
+and a r5.4xlarge configured identically to the t2.xlarge instance, but located
 in the \texttt{us-west-2d} availability zone. c5.9xlarge instances consist of 64
 vCPUs and have \SI{72}{\gibi\byte} of available memory, whereas the r5.4xlarge
 instance consists of 16 vCPUs and \SI{128}{\gibi\byte} of available memory. 
@@ -765,11 +765,11 @@ to read data sequentially from S3 to the t2.xLarge instance. We varied the
 filesize from \SI{1}{\kibi\byte} to \SI{4}{\gibi\byte} and measure the time it
 took to read the files from a \texttt{us-west-2} S3 bucket and from
 \texttt{tmpfs}. This method was favoured over more standard benchmarking
-libraries to ensure the two filesystems were benchmarked in the same way.
+libraries to ensure the two file systems were benchmarked in the same way.
 Results were then compared to benchmarking results produced by the
 \href{https://github.com/dvassallo/s3-benchmark}{s3-benchmark} library to ensure
 validity of our benchmarking method. The results can be seen in
-Table~\ref{table:benchmarks}.
+Table~\ref{table:rp:benchmarks}.
 
 
 %%tristan do i keep this if our model is just a theoretical eval? maybe it
@@ -787,15 +787,15 @@ S3 bucket in the same region.}
  latency (s) & 0.1 & $\num{1.6e-6}$ \\
  \hline
 \end{tabular}
-\label{table:benchmarks}
+\label{table:rp:benchmarks}
 \end{table}
 
 
 \section{Results}
 \subsection{Varying the file size}
 As we increase the file size we observe that the disparity between \sfs and
-Rolling Prefetch increases (Figure~\ref{fig:filesize}), with Rolling Prefetch
-significantly outpacing ($\sim$1.7x faster) \sfs at \SI{31.2}{\gibi\byte} (25
+Rolling Prefetch increases (Figure~\ref{fig:rp:filesize}), with Rolling Prefetch
+significantly outpacing ($\sim$1.7$\times$ faster) \sfs at \SI{31.2}{\gibi\byte} (25
 files). This is expected as per our theoretical evaluation. With a large amount
 of blocks, the pipeline duration is determined by the maximum between the time
 it takes to compute the data $T_{comp}$ and the time it takes to transfer the
@@ -813,20 +813,19 @@ like ${T_{cloud}}$ is proportional to the number of blocks used, and thus the
 amount of time saved increases with file size. In the worst case, Rolling
 Prefetch performance equals that of \sfs.
 
-\subsection{Varying the block size}%% some parts may be better suited for
-discussion
+\subsection{Varying the block size}%% some parts may be better suited for discussion
 
 At a very large number of blocks, the performance of both \sfs and Rolling
 Prefetch is degraded due to increased impacts of both S3 storage latency and, in
 the case of Rolling Prefetch, local storage latency
-(Figure~\ref{fig:blocksize}).  \sfs starts to surpass the speed of Rolling
-Prefetch, although not substantially (approx. 1.03~X) at 748 blocks.
+(Figure~\ref{fig:rp:blocksize}).  \sfs starts to surpass the speed of Rolling
+Prefetch, although not substantially (approx. 1.03$\times$) at 748 blocks.
 Furthermore, while we read from S3 at certain blocksizes, the block size on
-local storage is dictated by filesystem and kernel readahead size. In our
+local storage is dictated by file system and kernel readahead size. In our
 specific case, the data would be read from \texttt{tmpfs}, and thus we do not
 see a significant added cost to Rolling Prefetch. It could be inferred that the
-overhead of Rolling Prefetch may be more significant with a large number of
-blocks due to Nibabel's access patterns, which consist of many small reads.
+overhead of Rolling Prefetch may be more significant with many
+blocks due to NiBabel's access patterns, which consist of many small reads.
 
 Conversely, when decreasing the number of blocks we see an increase in
 performance in both \sfs and Rolling Prefetch. This is because both benefit from
@@ -858,11 +857,11 @@ could be masked by compute.
 \subsection{Parallelized workloads}
 % \tristan{This section refers to file numbers while figure is in GiB}
 When we parallelize the reads up to four concurrent processes
-(Figure~\ref{fig:parallel}), we notice that the trends are still consistent
+(Figure~\ref{fig:rp:parallel}), we notice that the trends are still consistent
 despite increased contention on local filesystems. This is likely due to the
 fact that \texttt{tmpfs} speeds would remain sufficiently high even with the
 increased contention caused by having at minimum 4 and potentially even up to 8
-concurrent threads accessing the filesystem at the same time. We speculate that
+concurrent threads accessing the file system at the same time. We speculate that
 the same pipeline running with data read from a single disk would have had worse
 performance due to its lack of scalability.
 
@@ -880,12 +879,12 @@ constant.
 
 The results obtained from our neuroimaging use cases indicate that, in all
 cases, the use of Rolling Prefetch can speed up analyses
-(Figure~\ref{fig:speedup}). The extent of this speedup is, however, dependent on
+(Figure~\ref{fig:rp:speedup}). The extent of this speedup is, however, dependent on
 a number of factors, such as instance type, application and number of shards.
 
 The greatest observed speedup with Rolling Prefetch was found when executing the
 bundle recognition application with a greater number of shards (1.64$\times$
-faster). This result echoes what was observed in Figure~\ref{fig:filesize} with
+faster). This result echoes what was observed in Figure~\ref{fig:rp:filesize} with
 even a more compute-intensive application like bundle recognition. We do not,
 however, observe a speedup with a single shard, as the size of the shard was so
 small it did not incur many reads from S3.
@@ -942,39 +941,39 @@ by the decrease in available vCPUs.
 \begin{figure}
 \begin{center}
 %    \vspace{-0.6em}
-\includegraphics[height=160pt]{figures/part3-chp1/filesize.pdf}
+\includegraphics[height=160pt]{figures/rp/filesize.pdf}
 %\setlength{\abovecaptionskip}{0pt} \setlength{\belowcaptionskip}{-30pt}
 \caption{Runtime performance of reading subsets of the HYDI dataset stored on
-Amazon S3 into Nibabel using \sfs and Rolling Prefetch on an Amazon EC2
+Amazon S3 into NiBabel using \sfs and Rolling Prefetch on an Amazon EC2
 t2.xlarge instance. Blocksize was set to \SI{64}{\mebi\byte} on both \sfs and
 Rolling Prefetch. Prefetch cache consisted of \SI{2}{\gibi\byte} tmpfs storage.}
-\label{fig:filesize}
+\label{fig:rp:filesize}
 \end{center}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=\columnwidth]{figures/part3-chp1/blocksize.pdf}
+\includegraphics[width=\columnwidth]{figures/rp/blocksize.pdf}
 %\setlength{\abovecaptionskip}{-10pt} \setlength{\belowcaptionskip}{-10pt}
 \caption{Runtime performance of reading a \SI{6}{\gibi\byte} subset of the HYDI
-dataset stored on Amazon S3 into Nibabel using \sfs and Rolling Prefetch with
+dataset stored on Amazon S3 into NiBabel using \sfs and Rolling Prefetch with
 various block size configurations on an Amazon EC2 t2.xlarge instance. Prefetch
 cache consisted of  \SI{2}{\gibi\byte} tmpfs storage.}
 %\vspace{-1.5em}
-\label{fig:blocksize}
+\label{fig:rp:blocksize}
 \end{center}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=\columnwidth]{figures/part3-chp1/parallel.pdf}
+\includegraphics[width=\columnwidth]{figures/rp/parallel.pdf}
 %\setlength{\abovecaptionskip}{-10pt} \setlength{\belowcaptionskip}{-20pt}
 \caption{Runtime performance of reading subsets of the HYDI dataset stored on
-Amazon S3 into Nibabel in parallel using 4 \sfs and Rolling Prefetch processes.
+Amazon S3 into NiBabel in parallel using 4 \sfs and Rolling Prefetch processes.
 Blocksize was set to \SI{64}{\mebi\byte} on both \sfs and Rolling Prefetch.
 Prefetch cache consisted of \SI{1}{\gibi\byte} tmpfs storage.}
 %\vspace{-6.5em}
-\label{fig:parallel}
+\label{fig:rp:parallel}
 \end{center}
 \end{figure}
 
@@ -990,11 +989,11 @@ Prefetch cache consisted of \SI{1}{\gibi\byte} tmpfs storage.}
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=\columnwidth]{figures/part3-chp1/speedup.pdf}
+\includegraphics[width=\columnwidth]{figures/rp/speedup.pdf}
 %\setlength{\abovecaptionskip}{-10pt} \setlength{\belowcaptionskip}{-8pt}
 \caption{Rolling prefetch speedup of the neuroimaging use-cases (histogram and bundle recognition) in various conditions. Experiments varying instance type and number of files were only performed with the bundle recognition pipeline.} 
 %\vspace{-1.5em}
-\label{fig:speedup}
+\label{fig:rp:speedup}
 \end{center}
 \end{figure}
 
@@ -1031,7 +1030,7 @@ increased contention.
 
 Rolling Prefetch is an added layer on top of \sfs that replaces its built-in
 cache strategies to intercept application read calls and ensure that data is
-preloaded. The implementation ensures that filesystem space requirements are not
+preloaded. The implementation ensures that file system space requirements are not
 exceeded during prefetching through limits set by the user. With the built-in
 eviction mechanism, users are not required to do any form of data management
 should they be processing datasets larger than available storage. Furthermore,
@@ -1089,7 +1088,7 @@ data had been processed by the task prior to failure.
 % Making the tasks smaller would reduce the costs associated with task restart,
 % but then the benefits of Rolling Prefetch would be limited.
 It is understandable that implementations such as Netco are adaptations to
-persistent filesystem, since then prefetching could work without limiting
+persistent file system, since then prefetching could work without limiting
 scheduler logic. For our implementation to be efficient within parallel
 processing frameworks, we would need to decouple it from the task itself and
 allow it to communicate with the task scheduler to determine which files to

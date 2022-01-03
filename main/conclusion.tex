@@ -8,13 +8,14 @@ employing them on infrastructure in which the pipelines are executed and having
 to rewrite standard applications entirely. Furthermore, Big Data Frameworks make
 lack some of the qualities that are highly regarded in scientific computing.
 
-We first explored the benefit that a data-intensive neuroimaging pipeline could gain
-from employing these strategies and found that it was quite significant. We then looked
-at how to adapt frameworks like Apache Spark to make their jobs easier to schedule on HPC
-and found that the implemented adaptations did not improve scheduling performance. We also
-investigated persistent memory storage as an alternative to adopting software solutions.
-While we found the hardware to provide similar performance, we found it was unlikely for it
-to be made widely available to researchers in the near future.
+We first explored the benefit that a data-intensive neuroimaging pipeline could
+gain from employing these strategies and found that it was quite significant. We
+then looked at how to adapt frameworks like Apache Spark to make their jobs
+easier to schedule on HPC and found that the implemented adaptations did not
+improve scheduling performance. We also investigated persistent memory storage
+as an alternative to adopting software solutions. While we found the hardware to
+provide similar performance, we found it was unlikely for it to be made widely
+available to researchers in the near future.
 
 Given these results, we decided the best way to provide data-management
 strategies to neuroimaging pipelines was to implement our own solutions. We had
@@ -34,13 +35,13 @@ calls. By adopting this approach, we were able to ensure that the underlying
 application would be able to function as normal without needed to make any
 changes.
 
-Our implementations were found to significantly reduce processing time by masking data
-transfers within task computations or minimizing data transfers altogether.
-While they can be applied in all cases, they
-have been found to be most effective when data and computation are similar. In the case of Sea in-memory,
-performance can be even better when data transfer time far exceeds computation time.
-Furthermore, we have not found either implementations to incur significant
-overheads.
+Our implementations were found to significantly reduce processing time by
+masking data transfers within task computations or minimizing data transfers
+altogether. While they can be applied in all cases, they have been found to be
+most effective when data and computation are similar. In the case of Sea
+in-memory, performance can be even better when data transfer time far exceeds
+computation time. Furthermore, we have not found either implementations to incur
+significant overheads.
 
 As more and more researchers are starting to interact with diverse types of
 infrastructures, such as both cloud and HCP, it will be important to extend Sea
