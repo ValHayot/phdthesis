@@ -3,17 +3,15 @@
 
         In recent years, the volume of neuroimaging data acquired has exceeded
         both the storage and computation capacity of a standard research 
-        lab workstation. With the advancement of data sharing technologies, 
+        lab workstations. With the advancement of data sharing technologies, 
         this data has been made widely available, however, accessibility to 
-        such data remains limited due to infrastructural demands and lack of 
-        performant software. Even with powerful infrastructure, such as High
+        such data remains limited due to infrastructural demands and high processing time.
+        Even with powerful infrastructure, such as High
         Performance Computing (HPC), software configured to 
         efficiently use resources is required to make execution time manageable. 
         Ensuring efficient data processing is 
         complex and limits accessibility to researchers with little programming 
-        knowledge. Existing neuroimaging workflow engines primarily rely on HPC
-        resource managers for performance and are therefore not well suited for
-        Big Data processing. As a result, frameworks for the efficient 
+        knowledge. As a result, frameworks for the efficient 
         processing of Big neuroimaging Data need to be developed.
         
         Many neuroimaging workflow engines currently exist. Examples include
@@ -25,38 +23,38 @@
         workflow engines aim to satisfy four criteria: 1) simplified
         workflow composition, 2) performance, 3) portability of the workflows 
         and 4) reproducibility of the analyses. While these workflow engines
-        do tackle performance, it is mainly limited to minimizing computation
-        time and does not consider data transfer times -- which are typically
-        costly in Big Data settings. Therefore, these engines need to be adapted
-        for the processing of neuroimaging data.
+        do tackle performance, it is mainly restricted to minimizing computation
+        time, which was the prevalent bottleneck pre-Big Data neuroimaging.
+        With the shift to Big Data, it is important that these workflow engines are extended
+        to address Big Data related bottlenecks.
 
         Big Data frameworks differ from those available in neuroimaging as their
         focus is mainly on workflow composition and performance, primarily
-        through the minimization of data transfers. Big Data frameworks such as
+        through the minimization of data transfers. They were originally conceived
+        to be used on commodity infrastructure, where the network can be a significant bottleneck,
+        particularly when transferring large amounts of data. Big Data frameworks such as
         Apache Spark~\cite{Zaharia:2016:ASU:3013530.2934664} and
         Dask~\cite{rocklin2015dask} both aim to be easy-to-use, applicable to a
         wide variety of analyses and improve performance in the processing of
-        Big Data. These types of systems were primarily designed to be efficient
-        on commodity infrastructure in which transferring data over a network is
-        extremely costly.
+        Big Data.
 
         The two main data-management strategies employed by Big Data frameworks
         are: data locality and in-memory computing. Data locality ensures that
-        the compute is moved to where the data is located, as it is faster to
+        the compute is moved to where the data is located, as it is less cumbersome to
         transfer code over a network than large datasets. In-memory computing attempts
-        to maintain all intermediate data in memory, as it is the fastest available storage
-        device that can be used for storing data.
+        to maintain all intermediate data in memory, due to memory's increased performance over
+        other available storage devices.
 
         Currently, there lacks a Big Data framework which is adapted for the
         processing of neuroimaging data. However, tools such as the Thunder 
         Project~\cite{Freeman:2014aa} allow for the processing of time-series
-        neuroimaging data using Spark as the backend framework. Such tools
-        provide built-in functions to process the data. For users to 
+        neuroimaging data using Apache Spark as the backend framework. Such tools
+        provide built-in functions to process the data. In order for users to 
         extend functionality, it is necessary for them to understand the 
         backend framework. Other scientific workflow engines, such as 
         Toil~\cite{Vivian:2017aa} and Pegasus~\cite{DEELMAN201517}, have 
-        incorporated features that enable more 
-        performant workflow executions for scientific Big Data. They also enable
+        incorporated features that enable
+        faster workflow executions for scientific Big Data. They also enable
         the integration of Big Data frameworks as sub-pipelines within their 
         workflows. Despite integration with Big Data frameworks, it is not
         possible to create Big Data workflows using their API exclusively.
@@ -79,13 +77,13 @@
         they may lose some features that are required for scientific workflows.
 
 
-	This thesis aims to bring the data-management strategies of Big Data
-        Frameworks to neuroimaging. It is divided into two parts.
-        Part~\ref{part:evaluation} explores the impacts that employing Big
-        Data optimization on data-intensive neuroimaging applications can bring
+	This thesis aims to facilitate the adoption data-management strategies in neuroimaging applications. 
+        It is divided into two parts.
+        Part~\ref{part:evaluation} explores the impacts of data-management strategies
+        on a data-intensive neuroimaging application
         and investigates alternative existing solutions. More specifically,
         Chapter~\ref{chp:bigdatastrategies} investigates the performance
-        benefits data locality and in-memory computing to data-intensive
+        benefits data locality and in-memory computing for data-intensive
         neuroimaging applications. Chapter~\ref{chp:spa} investigates how to
         best schedule Apache Spark applications on HPC infrastructure.
         Chapter~\ref{chp:optane} then looks at how improved hardware can also
@@ -93,7 +91,7 @@
         Persistent Memory on data-intensive neuroimaging pipelines.
 
         Part~\ref{part:implementation} focuses on tools designed to bring
-        data managemenent strategies to neuroimaging applications. Chapter~\ref{chp:rp}
+        data management strategies to neuroimaging applications. Chapter~\ref{chp:rp}
         discusses our implementation of Rolling Prefetch, a Python library designed to
         prefetch data from the cloud. Chapter~\ref{chapter:sea-comp} introduces Sea, a lightweight 
         data-management library for scientific applications executing on HPC. Chapter~\ref{chapter:sea-neuro}

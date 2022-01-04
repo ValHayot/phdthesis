@@ -246,7 +246,7 @@ This paper makes the following contributions:
       these file systems exist only during the time-window in which the
       resources are allocated. Furthermore, they both exist entirely within
       user-space using glibc interception. While these implementations simplify
-      usage of burst buffers for users, their configuration would be out of the
+      usage of burst buffers for users, their installation and configuration would be out of the
       scope of a typical HPC user and thus require sysadmin intervention.
       %include triple-H
 %\subsubsection{Kernel-space file systems} add comments in methods
@@ -257,6 +257,15 @@ This paper makes the following contributions:
 \section{Materials and Methods}
 
 \subsection{Sea design and implementation}
+
+\begin{figure*}
+
+    \centering
+    \includegraphics[width=\columnwidth]{figures/sea-comp/seacomp-diagram.pdf}%
+\caption{The Sea data-management library. Sea intercepts I/O-related glibc calls issued by the application and
+translates the path provided if located within the Sea mountpoint. Sea leverages a user-defined storage hierarchy to help select the most appropriate path and the redirects the call to glibc to process the request on the translated path. }
+\label{fig:seaneuro:diagram}
+\end{figure*}
 
 Sea\footnote{\url{https://github.com/valhayot/sea}} is an open-source user-space
 data-management C++ library for applications running on HPC systems. Its main

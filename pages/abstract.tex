@@ -1,12 +1,12 @@
 \begin{abstract}
   Neuroimaging has entered the Big Data era through the adoption of data sharing
-  practices coupled with improved data collection infrastructure enabling higher
+  practices and improved data collection infrastructure enabling higher
   resolution imaging. Whereas the pipelines have shifted to become increasingly
-  data-intensive, the software has minimally adapted to address this shift.
-  Rather, scientific frameworks have primarily focused on ease-of-use,
+  data-intensive, neuroimaging software has minimally adapted to address this shift.
+  Rather, scientific software has primarily focused on ease-of-use,
   reproducibility, portability and parallelism. While the goals of Big Data and
-  scientific frameworks differ, they can be combined to make scientific
-  frameworks more suitable to the processing of the increasingly prominent
+  scientific frameworks differ, their strategies can be combined to make scientific
+  frameworks more suitable for the processing of the increasingly prominent
   scientific Big Data.
 
 The objectives of this thesis are two-fold: 1) determine whether neuroimaging
@@ -19,8 +19,8 @@ most data-intensive case. While we found Big Data frameworks (i.e. Apache Spark)
 to significantly speedup data-intensive neuroimaging workflows, our analysis on
 overlay pilot-scheduling with Spark determined that large-scale Spark workflows
 would be difficult to run on HPC. Furthermore, while alternative hardware
-solutions, such as Intel Optane DCPMM produce speedups similar to processing
-entirely in memory with Spark and could be used as an alternative, it remains
+solutions, such as Intel Optane DCPMM produce speedups similar to
+in-memory processing with Spark and could be used as an alternative, it remains
 inaccessible to many researchers.
 
 To bring data-management solutions to neuroimaging applications, we developed
@@ -30,9 +30,9 @@ sequential prefetching of data located on Amazon S3 storage. Experimental
 results demonstrate the Rolling Prefetch can speed up experiments by a factor of
 1.8$\times$ and has a theoretical bound of 2$\times$.
 
-Sea targets the standard neuroimaging workflows executed on HPC. It is able to
-bring prefetching, data-locality and in-memory computing to POSIX-based
-command-line tools through the interception of libc calls. Using this approach
+Sea targets the standard neuroimaging workflows executed on HPC. It
+brings prefetching, data-locality and in-memory computing to POSIX-based
+command-line tools through the interception of glibc calls. Using this approach
 researchers can benefit from data-management related speedups by incorporating
 Sea into their standard analysis. Our results on standard neuroimaging pipelines
 show that Sea can speed up execution by an average of 7$\times$ with large datasets
