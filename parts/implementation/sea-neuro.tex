@@ -1,4 +1,4 @@
-\chapter{Automated neuroimaging data management with Sea}\label{chapter:sea-neuro}
+\chapter{Automated neuroimaging data-management with Sea}\label{chapter:sea-neuro}
 
 % Val\'erie Hayot-Sasson and Tristan Glatard \\
 % \begingroup \footnotesize
@@ -7,6 +7,8 @@
 % \vspace{5pt} \\
 % Manuscript in preparation. \\
 
+Manuscript in Preparation:\\
+Val\'erie Hayot-Sasson and Tristan Glatard. Automated neuroimaging data-management with Sea. 2022 \\
 \section{Abstract}
 
 	Neuroimaging open-data initiatives have led to increased availability of large
@@ -27,7 +29,8 @@
   file system's (e.g. Lustre) performance is deteriorated (up to 32$\times$).
   When the shared file system is not overburdened by other users, performance is
   unaffected by Sea, suggesting that Sea's overhead is minimal even in cases
-  where it is not useful.
+  where it is not useful. Overall, Sea is beneficial, even when
+  performance gain is minimal, as it can be used to limit files on PFS.
   
   \section{Introduction}\label{sec:sea_neuro:introduction}
     
@@ -36,7 +39,7 @@
     as the Human Connectome Project (HCP)~\cite{HCP} and the UK
     Biobank~\cite{ukbiobank} reach up to Petabytes of data. For datasets of this
     volume, there is no choice but to store the data in slower remote storage,
-    which can incur significant data transfer costs when attempting to read.
+    which can incur important data transfer costs when processing.
     Should the processed data be of a similar magnitude in volume, application
     writes will also need to be made to compute-remote storage thus further
     prolonging application makespan. 
@@ -66,13 +69,13 @@
     Big Data in neuroimaging can be present in two formats: 1) very large files
     (e.g. BigBrain~\cite{amunts2013bigbrain}) and 2) small files pertaining to a
     population of individuals, such as those found in MRI datasets, that
-    collectively amount to a large dataset. Differences in the number and size
+    collectively amount to very large datasets. Differences in the number and size
     of files result in different data transfer overheads. Whereas large file I/O
     is predominantly impacted by the underlying storage bandwidth, small file
-    I/O is results in a significant latency overhead. Addressing both of these
+    I/O may result in non-negligible latency overheads. Addressing both of these
     issues in neuroimaging is important, however, for this paper we focus on
-    fMRI datasets, which are currently more likely to experience a latency
-    overhead. We chose to focus on these types of datasets due to the number of
+    fMRI datasets, which are more likely to experience latency
+    overheads. We chose to focus on these types of datasets due to the number of
     well-established tools that process the data.
 
     
@@ -98,20 +101,21 @@
     they are shared between all the users on the cluster, meaning that users
     with data-intensive applications can effectively deteriorate the performance
     of the shared file system for all users on the cluster. Solutions for
-    improving shared file system performance include throttling the data
+    improving shared file system performance include throttling~\cite{huang2020ooops} the data
     intensive workloads or recommending the use of Burst Buffers~\cite{bb} (e.g.
     reserving a compute node for storage or leveraging local compute storage
     during processing). The latter, however, requires that the user manages
-    their data to and from the Burst Buffer.
+    their data to and from the Burst Buffer, unless a Burst Buffer file system, such as
+    BurstFS~\cite{burstfs} or GekkoFS~\cite{gekkofs} is installed.
     
-    In order for a file system to be usable by the average researcher on an HPC
-    cluster, they must be loadable without administrative privileges.
-    Furthermore, as the applications are typically made to interact with
+    In order for a file system to be mounted by an HPC
+    cluster user, they must be loadable without administrative privileges.
+    As the applications are typically made to interact with
     POSIX-based file systems, the new file system must also be compliant to the
     format. One method to ensure that these conditions are met is by using the
     \texttt{LD\_PRELOAD} trick. This trick is used to intercept select library
     calls and redefine their behaviour. It has been used in many projects and to
-    create lightweight versions of file systems~\cite{xtreemfs}. 
+    create lightweight userspace versions of file systems~\cite{xtreemfs,burstfs,gekkofs}. 
     
     In this paper, we present Sea, a file system designed to automate data
     management of neuroimaging pipelines running on HPC systems. The goal of Sea
@@ -700,7 +704,7 @@ due to Sea's initial reading of the data from Lustre.
     likely to be consistent. Despite not testing against all parameters and
     toolbox applications, Sea has been extensively tested using many integration
     tests on 3 different Linux operating systems (Ubuntu, CentOS and Fedora),
-    and a total of 8 different CentOS versions.
+    and a total of 8 different OS versions.
 
     The ability to use libc interception over more common alternative methods
     such as kernel-based or fuse-based file systems was essential in ensuring

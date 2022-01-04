@@ -3,12 +3,16 @@ computing}\label{chapter:sea-comp}
 % remove neuroimaging and replace with scientific computing  add user-space,
 % switch HPC to computing clusters
 
-Val\'erie Hayot-Sasson and Tristan Glatard \\
-\begingroup \footnotesize Department of Computer Science and Software
-Engineering, Concordia University, Montreal, Canada \\
-\endgroup 
-\vspace{5pt} \\
-Manuscript in preparation. \\
+% Val\'erie Hayot-Sasson and Tristan Glatard \\
+% \begingroup \footnotesize Department of Computer Science and Software
+% Engineering, Concordia University, Montreal, Canada \\
+% \endgroup 
+% \vspace{5pt} \\
+% Manuscript in preparation. \\
+
+Manuscript in Preparation:\\
+Val\'erie Hayot-Sasson and Tristan Glatard. Sea: A lightweight data-management library for Big Data scientific
+computing. 2022 \\
 
 \section{Abstract}
 
@@ -437,7 +441,24 @@ number of threads multiplied by the file size does not exceed storage space.
 \subsection{Testing}
 To work effectively, Sea has to intercept every glibc function that interacts with files or
 directories. Failure to intercept some of these function may result in the whole application
-crashing. 
+crashing. This is because only Sea can translate the Sea mountpoint file paths to their
+respective real locations. Due to an absence of standardized glibc testing suites,
+we developed our own integration tests.
+
+Our tests have been executed on three different operating systems: Ubuntu (xenial, bionic, focal),
+Fedora (32, 33, 34) and Centos (6, 7). Using this test matrix, the Sea tests were able to span seven glibc
+versions ranging from 2.17 to 2.33. As glibc file system functions may change over time, Sea behaviour with
+newer and older versions of glibc is undefined. 
+% ldd (GNU libc) 2.17
+% ldd (Ubuntu GLIBC 2.23-0ubuntu11.3) 2.23
+% ldd (Ubuntu GLIBC 2.27-3ubuntu1.4) 2.27
+% ldd (GNU libc) 2.28
+% ldd (Ubuntu GLIBC 2.31-0ubuntu9.2) 2.31
+% ldd (GNU libc) 2.31
+% ldd (GNU libc) 2.32
+% ldd (GNU libc) 2.33
+
+
 
 \subsubsection{Flushing and eviction modes}
 %\todo{add diagrams here?}
@@ -555,8 +576,10 @@ the application, but is not needed in post-processing analysis or by other nodes
 
 
 
-      To effectively predict in which scenarios Sea will provide speedup over
-      the baseline solution, we require a performance model. Since different
+      Experimental results can be prone to error and variability, particularly in instances
+      where there a many factors at play, such as in cluster environments. To improve
+      confidence in our results, we developed a simplified performance model that
+      could help describe the behaviours found in our experimental results. Since different
       parallel file systems may operate differently, our baseline model will be
       based on Lustre which is commonly used on HPC infrastructure.
 
@@ -1046,7 +1069,7 @@ the application, but is not needed in post-processing analysis or by other nodes
     \end{subfigure}
     \caption{Benchmarks comparing Lustre and Sea In-memory performance under
     various conditions using the Incrementation application on the Big Brain
-    image. All experiments were repeated 5$\times$.}
+    image. All experiments were repeated 5$\times$. Model bounds represented by coloured regions}
     \label{fig:sea-comp:benchmarks}
     \end{figure*}
 
