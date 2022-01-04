@@ -131,13 +131,11 @@ data-management with Sea. 2022 \\
     been used in many projects and to create lightweight userspace versions of
     file systems~\cite{xtreemfs,burstfs,gekkofs}. 
     
-    In this paper, we present Sea, a file system designed to automate data
-    management of neuroimaging pipelines running on HPC systems. The goal of Sea
-    is to complement existing neuroimaging applications such that both efficient
-    compute and data management can be achieved executed on HPC without
-    significant user intervention. As a secondary goal, Sea aims to ensure the
-    fair sharing of cluster usage by alleviating the impacts of heavy writers on
-    the shared file systems as a whole.  
+    In this paper, we evaluate Sea, a data-management library for HPC, on three neuroimaging preprocessing pipelines
+    executed on three different datasets. We structure our analysis of Sea for the data management of
+    neuroimaging pipelines by first investigating whether Sea can effectively intercept the calls of these neuroimaging pipelines.
+    We then investigate the presence of speedup by using Sea alongside neuroimaging pipelines and try to understand the conditions
+    which result in greater speedups.
     
     % \tristan{Intro logic is good but writing could be polished}
     % \tristan{Outlining the content of the paper would be useful}
