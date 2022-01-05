@@ -27,7 +27,7 @@ To bring data-management solutions to neuroimaging applications, we developed
 two libraries, namely, Rolling Prefetch and Sea. Rolling Prefetch is our
 data-management solution for cloud-based applications that enables the
 sequential prefetching of data located on Amazon S3 storage. Experimental
-results demonstrate the Rolling Prefetch can speed up experiments by a factor of
+results demonstrate that Rolling Prefetch can speed up experiments by a factor of
 1.8$\times$ and has a theoretical bound of 2$\times$.
 
 Sea targets the standard neuroimaging workflows executed on HPC. It
@@ -35,7 +35,7 @@ brings prefetching, data-locality and in-memory computing to POSIX-based
 command-line tools through the interception of glibc calls. Using this approach
 researchers can benefit from data-management related speedups by incorporating
 Sea into their standard analysis. Our results on standard neuroimaging pipelines
-show that Sea can speed up execution by an average of 7$\times$ with large datasets
+show that Sea can speed up execution by an average of 11$\times$ with large datasets
 writing to a deteriorated shared file system.
 
 
