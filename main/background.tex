@@ -6,24 +6,24 @@
 
         \subsection{Big Neuroimaging Datasets}\label{datasets}
 
-            As a result of the rise in data sharing in neuroscience,
-            neuroimaging Big Data has come to fruition. The field of
-            neuroscience has now reached a bottleneck where there exists
-            sufficient data to make impactful studies, but the software to
-            process these datasets have not evolved with the size of the data.
+            % As a result of the rise in data sharing in neuroscience,
+            % neuroimaging Big Data has come to fruition. The field of
+            % neuroscience has now reached a bottleneck where there exists
+            % sufficient data to make impactful studies, but the software to
+            % process these datasets have not evolved with the size of the data.
 
-            Neuroimaging big data comes in two formats: 1) large images and 2)
+            Neuroimaging Big Data comes in two formats: 1) large images and 2)
             large datasets. Large images consist of singular images ranging from
-            100s of Gigabytes to Terabytes in size. A well-known example of such
-            an image is the BigBrain~\cite{Amunts1472}, a histological image of
+            100s of Gigabytes to Terabytes in size. A well-known example of a large image
+            is the BigBrain~\cite{Amunts1472}, a histological image of
             the brain of a healthy 69 year-old man. At its highest resolution,
             it is 1x1x20$\mu$m or 1TB in size. Other examples of large images
             can be found in electron microscopy (EM)~\cite{Hildebrand:2017aa},
             polarized light imaging (PLI)~\cite{10.1007/978-3-319-12084-3_1} and
             micro computational tomography
             (microCT)~\cite{10.1371/journal.pone.0035691}. Images at such high
-            resolution are important to researchers as they provide insights
-            into aspects not otherwise detectible in images at lower
+            resolutions are important to researchers as they provide insights
+            into aspects not otherwise detectable in images at lower
             resolutions. However, due to their size and lack of resources
             available to process such images, research on this data remains
             limited.
@@ -34,7 +34,7 @@
             %\tristan{This special issue on data sharing is also worth citing:
             %https://www.sciencedirect.com/journal/neuroimage/vol/124/part/PB}
             In contrast, large datasets consist of many images acquired from
-            multiple subjects, which are too large to be processed in their
+            a population of individuals, which are too large to be processed in their
             entirety. Notable examples of these datasets include the Alzheimer's
             Disease Neuroimaging Initiative
             (ADNI)~\cite{doi:10.1002/jmri.21049},
@@ -47,7 +47,7 @@
 
             The ADNI initiative is a collection of images (structural and
             functional MRI, PET), urine, serum, cerebrospinal fluid biomarkers,
-            as assessments (clinical and neuropsychometric) of 800 elderly
+            and assessments (clinical and neuropsychometric) of 800 elderly
             subjects, which of whom 200 where healthy, 400 exhibited mild
             cognitive impairment and the remaining 200 showed signs of
             Alzheimers. Imaging data is available both pre- and post-processed
@@ -97,7 +97,7 @@
             As in ABIDE, these pipelines reused many commonly-used
             neuroimaging tools such as FreeSurfer and FSL for structural data
             and FSL and other tools for functional data. The total amount of
-            data made available by the HCP reaches up to nearly 1 Petabyte.
+            data made available by the HCP reaches up to nearly one Petabyte.
 
 
             The UK Biobank is an initiative aimed at the detection of pre-symptomatic
@@ -121,7 +121,7 @@
             entirety. It is also important to note that many of the pipelines
             developed by these initiatives made use of popular neuroimaging
             toolboxes, such as FSL~\cite{SMITH2004S208}, FreeSurfer~\cite{freesurfer}, ANTS~\cite{ants},
-            CIVET~\cite{civet}, rather than creating their own. Therefore, there is a great
+            CIVET~\cite{civet}. Therefore, there is a great
             need for Big Data frameworks that can leverage existing tools for
             the efficient processing of large-scale datasets. Widespread
             availability and accessibility of such frameworks will in turn lead
@@ -136,7 +136,7 @@
             configuration of multiple computing sites and provenance capture of
             all activities must be managed by the researcher. This puts a heavy
             burden on researchers as they require some knowledge of all these
-            components in order to manage it correctly. These platforms also
+            components. Open-science platforms also
             play a vital role in promoting research through the sharing of
             knowledge. Users can choose to share their data and pipelines with
             others, reducing the need for others to collect their own data or to
@@ -149,7 +149,7 @@
             from scheduling policies, to available file systems, to environment
             and available libraries. Platforms relieve the user from having to
             know site-specific details by providing seamless execution on any
-            cluster the Platform has knowledge of.
+            cluster the platform has knowledge of.
 
             Examples of popular neuroinformatics open-science platforms include
             CBRAIN~\cite{10.3389/fninf.2014.00054},
@@ -159,45 +159,44 @@
             for the deployment of workflows on HPC resources. All three of these
             systems allow users to configure, manage, share and execute their
             workflows with the help of a web-based GUI. Integration with compute
-            resources is entirely abstracted by the platforms. These platforms
+            resources is entirely abstracted by the platforms. Additional, the platforms
             additionally provide tools to visualize their data.
 
             As neuroimaging workflow engines are typically best suited for
             compute-intensive workflows, the workflows accessible in these
-            platforms are not expected to be as suitable to process the volume
-            of data made accessible by these platforms. Since these platforms
+            platforms are not expected to be as suitable to process the voluminous data
+            made accessible by these platforms. Since these platforms
             make various infrastructures available to researchers, workflow
             engines must be adapted to efficiently execute on the infrastructure
             made available.
             
         \subsection{Infrastructure}\label{infrastructure} HPC infrastructure was
             initially designed for the processing of compute-intensive
-            applications. As a result, resource managers for these systems
-            employ strategies to efficiently use the compute resources available
-            for processing. However, with the advent of big data, data-intensive
+            applications. As a result, resource managers facilitate the request of compute
+            resources but do not provide mechanisms to minimize data transfer. However, with the advent of Big Data, data-intensive
             workflows are now beginning to become more present on HPC systems.
-            Since the schedulers and workflow engines made for HPC systems are
-            ``data-unaware'', they are not efficient with the processing of Big
-            Data
+            Since the schedulers and workflow engines made for HPC systems do not
+            attempt to minimize data transfers, they are not efficient in the processing of Big Data.
 
             HPC and Big Data infrastructure differ in many ways. We define HPC
             systems as those that employ a shared parallel file system (distinct
-            from any compute node), such as Lustre, and data-unaware schedulers.
-            The shared parallel file system is the slowest of all storage devices
-            found on HPC as it is shared amongst all users of the system.
-            Compute nodes in such infrastructure may not contain any local
-            storage. However, network interconnects between nodes are typically
-            fast. Resources managers used in HPC infrastructures typically
+            from any compute node), such as Lustre, and locality agnostic resource managers.
+            The shared parallel file system is oftentimes the slowest file system available
+            on HPC as it is shared between all users. In other words, while scalability and parallel performance
+            make it superior in performance to that of a compute node's local storage, heavy traffic from other users on
+            the parallel file system may significantly degrade its performance. 
+            Compute nodes on HPC infrastructure may optionally contain local storage
+            and have very fast network interconnects between nodes. Resources managers used in HPC infrastructures typically
             employ batch scheduling and execute heterogeneous workflows. Examples
             of schedulers used in HPC clusters include
             SLURM~\cite{yoo2003slurm}, PBS~\cite{10.1007/3-540-60153-8_34},
             SGE~\cite{SGE} and HTCondor~\cite{htcondor}.
 
             Big Data infrastructure differs from HPC infrastructures in that it
-            uses less-costly hardware. It follows a shared-nothing paradigm
+            relies on commodity infrastructure. It follows a shared-nothing paradigm
             where the storage is not shared between nodes. That is, all compute
             nodes are responsible for storing the data as well. File systems
-            used within such infrastructure are distributed file systems, such as
+            used within Big Data infrastructure are distributed file systems, such as
             the Hadoop Distributed File System (HDFS)~\cite{5496972} and
             Alluxio~\cite{Li:2014:TRM:2670979.2670985}. Fault-tolerance of the
             data is achieved through replication across nodes. As transferring
@@ -232,10 +231,9 @@
             infrastructure. In contrast, Big Data frameworks typically rely on
             some form of local storage. Employing a Big Data
             framework on HPC infrastructure may in turn result in less to no
-            data locality -- a strategy employed by Big Data frameworks to
-            minimize data movement across the network. Due to the variability in
-            infrastructure available to researchers, a workflow framework good
-            for neuroscience must be well adapted to handle these differences.
+            data locality. Due to the variability in
+            infrastructure available to researchers, a workflow engine
+            compatible with neuroscience applications must be well adapted to handle these differences.
 
     \section{Workflow composition}\label{workcomp}
 
@@ -248,10 +246,9 @@
         libraries. A workflow activity with all its dependencies is considered
         ready to be staged.
 
-        For a workflow engine to be considered successful, it must be simple to
-        compose workflows using that framework. New researchers should be able
-        to acquire the skills to compose workflows without investing a
-        significant amount of time in understanding it. Reuse of existing tools
+        For a workflow engine to be considered practical, it must be simple to
+        compose workflows using it. New researchers should be able
+        to acquire the skills to compose workflows without investing ample time in understanding it. Reuse of existing tools
         is also common occurrence in neuroinformatics, and workflow engines need
         to accommodate this by undertaking a modular approach and being easily
         extensible. With the sharing of data also comes the sharing of
@@ -280,8 +277,8 @@
             greatly affects how easily it will get picked up by the community.
             Complex languages may mean greater efficiency of engines, but also
             result in extensive time spent on learning and developing the
-            pipelines. Moreover, some researchers may not be well-versed in
-            programming and may require very easy-to-use engines.
+            pipelines. Moreover, some researchers may be new to
+            programming and require very simple engines.
 
             To address this issue, some workflow engines have taken the role of
             employing a graphical user interface (GUI). This makes workflow
@@ -291,7 +288,7 @@
             that users are greatly limited by the tasks they can perform. For
             instance, workflows that perform any form of iterative operations
             (e.g. machine-learning workflows) or workflows with conditionals
-            (e.g. given a certain input, do not execute this activity) can
+            (e.g. given a certain input, proceed in a given manner) can
             hardly be represented by a GUI. Workflow engines that employ a
             workflow composition GUI include: SPM, Taverna, OpenMOLE, LONI and
             Galaxy.
@@ -310,10 +307,10 @@
             widespread use within the community. Other advantages of programming
             in Python include: a wide array of available libraries, particularly
             neuroimaging-specific ones such as Nilearn~\cite{nilearn} and
-            Nibabel~\cite{matthew_brett_2018_1287921} and more general, but
+            NiBabel~\cite{matthew_brett_2018_1287921} and more general, but
             heavily used in neuroimaging, libraries such as SciPy~\cite{scipy}
-            and Scikit Learn~\cite{pedregosa2011scikit}, and a lower learning
-            curve compared to other programming languages. Additionally, Python
+            and Scikit Learn~\cite{pedregosa2011scikit}. Furthermore, Python programming
+            exhibits lower barrier to entry compared to other programming languages. Python
             is platform independent meaning it can be installed on any system.
             In terms of Big Data frameworks that employ Python, Dask is
             exclusively written in Python, whereas Hadoop MapReduce and Spark
@@ -322,7 +319,7 @@
 
             Another widely-used high-level programming language in the
             neuroinformatics community is MATLAB/Octave. Workflow engines which
-            use this language include: PSOM, SPM, and Automatic analysis. Like
+            use this language include: PSOM, SPM, and Automatic Analysis. Like
             Python, MATLAB and GNU/Octave are platform-independent and also easy
             to use. In addition, MATLAB has been found to exhibit better
             performance compared to Python for common technical tasks. It also
@@ -330,15 +327,15 @@
             imposing MATLAB as programming language is that it is proprietary,
             thus imposing a fee on anyone wishes to program in that language or
             have access to their diverse array of libraries. To offset this,
-            PSOM ensure compatibility with the GNU Octave programming language,
+            PSOM ensures compatibility with the GNU Octave programming language,
             thus removing the requirement to purchase software for workflow
             composition. 
 
             Many researchers have been exposed to Shell scripting languages as
-            several scientific workflows are composed in Linux and OSX-based
+            several scientific workflows are composed in Unix-based
             environments. These environments typically have Make installed by
-            default eliminating the need for users to install it manually. These
-            features make workflow engine Make desirable for scientific
+            default eliminating the need for users to install it manually. Such
+            features results in the workflow engine Make being desirable for scientific
             computing. As Make is exclusive to Linux environments, it is not
             platform-independent. However, Make has the flexibility of being
             easily extensible and can interface directly with any command-line
@@ -412,7 +409,7 @@
                 workflows and can be improved in terms of performance. The
                 resilient distributed datasets
                 (RDD)~\cite{Zaharia:2012:RDD:2228298.2228301}, Spark's main
-                abstractions addresses these issues by being a shared-memory
+                abstraction addresses these issues by being a shared-memory
                 structure. They are immutable and only permit coarse-grained
                 edits, to ensure fault-tolerance. The RDDs shared memory enables
                 a reduction in I/O operation as data can be maintained in
@@ -467,8 +464,8 @@
 
             Making the choice between a programming or a markup language for
             interface definition is not obvious. One of the main reasons for
-            selecting a programming language is that programming language is
-            more versatile than are markup language, allowing any type of
+            selecting a programming language is that programming languages are
+            more versatile than markup languages, allowing any type of
             operation to be defined. For instance, a dynamic number of outputs
             can be generated using a programming-language based interface
             definition. Workflow engines that utilize programming languages for
@@ -484,12 +481,14 @@
             describe the command, such as order of parameters and required and
             optional parameters. Apart from Input and Output Spec, a Python
             dictionary containing all expected outputs can be included. Before
-            executing a CLI, Nipype can start X virtual framebuffer if user
-            interaction through a GUI is required by the tool if specified. For
+            executing a CLI, Nipype can start an X virtual framebuffer if user
+            interaction through a GUI is required by the tool. For
             SPM interfaces, the job type and name must be specified. Interfaces
             to MATLAB require definition of the run function, while Python
             interfaces require the definition of the \textit{\_run\_interface}
-            function.
+            function. The next generation of Nipype, Pydra~\cite{pydra}, expands on
+            the Input and Output spec allowing the use of lazily loaded values to be passed
+            between tasks.
             
             PSOM’s tool interfaces are known as \textit{Bricks}. They are a
             little less versatile than Nipype's interfaces since they can only
@@ -505,7 +504,7 @@
             and its parameters as input. Atoms, typically used to wrap around
             MINC file-format related tools, inherit from the \textit{CmdStage}
             class, and require the input MINC file (string or file handler) to
-            be provided. A output file can also be specified, but it must be of
+            be provided. An output file can also be specified, but it must be of
             the same format as the MINC file (string or file handler).
             Additionally, it is possible to pass multiple optional arguments to
             the Atom.
@@ -631,9 +630,9 @@
             communicate with the tools.
 
             
-    \section{Performance}\label{performance} Neuroimaging frameworks are
-        notoriously known to be compute-intensive. The workflows and their
-        respective tools needed to incorporate parallelism in order to save on
+    \section{Performance}\label{performance} Neuroimaging applications are
+        historically known to be compute-intensive. The workflows and their
+        respective tools incorporate parallelism in order to save on
         computing time. Maintaining good performance has become especially
         critical now that neuroimaging Big Data has emerged. The dichotomy
         remains between scientific workflows and Big Data workflows. While
@@ -641,13 +640,12 @@
         they still lack the strategies Big Data frameworks employ to reduce data
         transfers. 
         
-        Another notable aspect to consider is that both types of engines
+        Another notable aspect to consider is that both types of frameworks
         (scientific and Big Data) are tightly coupled to the infrastructure they
         were intended to be used on. Scientific workflow engines try to remain
         efficient in their handling of compute resources since such resources
         were previously scarce. In contrast, Big Data frameworks make efficient
-        use of commodity clusters, where data transfers are burdensome,
-        particularly when faced with Big Data.
+        use of commodity clusters, where data transfers over networks can be curbersome.
 
         As some researchers are trying to shift towards the use of commodity
         infrastructure while others are trying to process Big Data on HPC, the
@@ -675,7 +673,7 @@
             
             Scientific workflows focus on the efficient scheduling of tasks and
             rely on I/O and network transfers to communicate the data between
-            nodes. In a data intensive environment, such operations could incur
+            nodes. In a data intensive environment, such operations may incur
             significant performance penalties. To mitigate this issue and remain
             efficient in the face of Big Data, Spark and Dask implement data
             locality, lazy evaluation and in-memory processing. Data locality is
@@ -685,8 +683,8 @@
             In-memory processing, on the other hand, tries to remove any I/O
             that occurs between tasks. Platforms such as MapReduce rely heavily
             on I/O, but the I/O performed occurs on the compute node rather than
-            on shared storage, making it generally more efficient than
-            scientific workflows. Additionally, MapReduce uses the concept of
+            on shared storage, making it more efficient than
+            scientific workflows when processing Big Data. Additionally, MapReduce uses the concept of
             locality to ensure limit data transfers across the network. For the
             efficient processing of neuroimaging Big Data, it will be necessary
             for scientific workflow engines to incorporate these strategies.
@@ -694,7 +692,7 @@
 
             \subsubsection{Strategies}
                 \paragraph{In-memory computing}
-                    Random Access Memory (RAM) is the fastest memory available
+                    Random Access Memory (RAM) is the fastest storage directly available
                     to workflow engines. Big Data frameworks, such as Spark and
                     Dask, leverage this feature by maintaining data in memory
                     between tasks rather that saving them to local disk or
@@ -767,7 +765,7 @@
                     data is extracted from a non HDFS-like filesystem, the
                     initial loading of data will not use data locality. However,
                     in all future tasks in which the data is already loaded into
-                    an RDD, the scheduler will be able to assign task to the
+                    the RDD, the scheduler will be able to assign task to the
                     most favorable partition dictated by delay scheduling
                     according to data locality.
 
@@ -787,25 +785,26 @@
 
             \subsubsection{Big Data file system optimizations for HPC}
 
-                Writing Big Data to Lustre is very costly compared to local
-                node storage. Distributed file systems found on HPC
+                Writing Big Data to Lustre is costly compared to compute-local
+                storage. Distributed file systems found on HPC
                 infrastructure provide their own form of fault-tolerance,
                 therefore, adding a Big Data file system such as HDFS which
                 replicates the data may burden the storage layer only to provide
                 a feature which already exists. This is especially problematic
-                as storage on HPC compute nodes may be limited. Moreover, while
+                as storage on HPC compute nodes may be limited and is by nature ephemeral.
+                Moreover, while
                 Big Data frameworks typically execute on a dedicated Big Data
                 cluster, they will be on a shared cluster in HPC, with many
-                processed trying to access the memory. The following are two
+                processes trying to access the memory. The following are two
                 optimizations made for the storing of Big Data.
 
                 Alluxio~\cite{Li:2014:TRM:2670979.2670985}, formerly known as
                 Tachyon, is an in-memory file system that stores lineage data to
                 offset the cost of writing data to disk. The assumption that
                 Alluxio makes is that it will be less costly to recompute the
-                data that to store the data to disk and replicate across the
+                data than to store the data to disk and replicate across the
                 network for fault tolerance. However, unlike Spark applications,
-                Alluxio is meant to run indefinitely, making it unfavourable in
+                Alluxio is meant to run indefinitely, making it unfavourable, in
                 some cases, to recompute the data from its starting point. For
                 this, Alluxio evaluates the lineage data and checkpoints the
                 files which have been repeatedly accessed (i.e. hot files). This
@@ -840,11 +839,13 @@
                 frequent, meaning Alluxio will need to store more data that
                 desirable.
 
-                Triple-H's main limitation is that it assumes the compute nodes
-                have local storage. This is certainly not always the case and
-                any performance improvements in systems without local storage
-                may be negligible at best.   
-            
+                Triple-H provides a good configuration for leveraging local storage on HPC to speed up
+                I/O. However, it is based off of HDFS, meaning it relies on applications that can communicate with
+                HDFS, which is not the average neuroimaging application. To the best of
+                our knowledge, Triple-H is not user-installable and must be preinstalled
+                by the system administrator. Additionally, it is not publicly available.
+                
+                
         \subsection{Big Data Scheduling}\label{sched}
             
             Scientific workflows typically rely on HPC schedulers for
@@ -871,7 +872,7 @@
             single-node and cluster deployments. For cluster deployments, Spark
             has two execution modes: client and cluster. For client execution,
             the application driver is intended to be executed on the client
-            node. In cluster mode, however, the driver is intended to be running
+            node. In cluster mode, the driver is intended to be running
             on a compute node. Cluster mode can ensure fault-tolerance of not
             only the workers and master, but also the driver. However, cluster
             mode is not available to PySpark deployments using the standalone
@@ -922,7 +923,7 @@
             wait until all nodes become available to begin execution.
             Papers~\cite{7530058}~\cite{Baer:2015:IAS:2792745.2792779} both use
             this strategy. Furthermore, pilot-agent scheduling could be adapted
-            to enable smart cluster resizing. Conversly, maintaining data
+            to enable smart cluster resizing. Conversely, maintaining data
             locality using a shared HDFS instance will remain an issue. 
          
 
@@ -1005,8 +1006,8 @@
 
         \subsection{Platform-independence}
             Achieving platform-independence allows users to use the workflow
-            engine in any available environment. This however does not imply
-            that the tools, and as a consequence, the pipelines created will
+            engine in any available environment. This does not imply
+            that the pipelines created using the tools will
             also be platform-independent. Many workflow engines have opted to be
             platform independent. These workflow engines include: Nipype, PSOM,
             SPM, FASTR, LONI, AA, Pydpiper, Taverna, Toil, MapReduce, Spark and
@@ -1057,7 +1058,7 @@
             on HPC systems. It is an open-source project designed to meet the
             security, portability and reproducibility requirements of the
             scientific community. The main difference between Docker and
-            Singularity is that users gain root permissions in a Docker
+            Singularity is that users may gain root permissions in a Docker
             container, and thus obtain root access to the underlying host OS.
             This is a serious security concern in HPC systems where many users
             share the same resources and therefore are given restricted access
@@ -1102,7 +1103,7 @@
             the case. Moreover, Docker engines cannot be launched on-the-fly as
             they require administrative privileges. However, should a user wish
             to run a Docker container, OpenMOLE provides a mechanism to run
-            DockerHub tools in unprivileged using udocker.
+            DockerHub tools in unprivileged mode using udocker.
 
             Other workflow engines do not use any form of containerization to
             ensure that workflows can be shared easily amongst users. These
@@ -1283,7 +1284,7 @@
             
             While all workflow engines capture generally the same type of
             provenance information, they differ in how much provenance
-            information is captured and how it's done. LONI, Pegasus, Pydpiper
+            information is captured and how it it is done. LONI, Pegasus, Pydpiper
             and Galaxy capture some provenance data, whereas engines like
             Nextflow, Make, Toil and MapReduce capture very limited  
             provenance information. OpenMOLE handles provenance through
@@ -1357,7 +1358,7 @@
             original study. Workflow engines that support the encapsulation of
             tools include: Galaxy, Toil, Nextflow, Pegasus and FastR. 
 
-            All workflows, despite the framework, can theoretically be
+            All workflows, irrespective of the framework, can theoretically be
             containerized. This is an important feature as custom UDFs which are
             not integrated as a CLI would not be containerized. Such functions
             also risk contributing to numerical instability of workflows. One
@@ -1366,7 +1367,7 @@
             particularly those using HPC schedulers, across cluster nodes.  
 
             Containerization ensures that users executing their workflows in the
-            ``same" (containerized) environments will obtain the same results. A
+            ``same'' (containerized) environments will obtain the same results. A
             major issue with containerization is that despite it controlling
             environments and permitting experiments to be reproducible, it does
             not solve the issue of numerical instability. Moreover, this
@@ -1391,7 +1392,7 @@
         and results indicate that Big Data frameworks are effective at improving
         the performance of scientific workflows. This was even shown to be the
         case when workflows were compute-intensive, as is the case with many
-        neuroimaging frameworks. Performance of Spark and Dask is comparable,
+        neuroimaging applications. Performance of Spark and Dask is comparable,
         however, Dask has been found to become less efficient during the
         processing of larger datasets, whereas Spark exhibits reduced
         performance when significant amounts of shuffling occur. However, both
@@ -1430,7 +1431,7 @@
         locality unaware. File system improvements are effective at improving
         performance, but make assumptions on the hardware configuration. More
         research will need to be investigated into making Big Data frameworks
-        more performant on HPC infrastructure.
+        more optimized for HPC infrastructure.
 
         Although scientific workflow engines lack important features found in
         Big Data frameworks, the employ their own strategies, such as
@@ -1492,11 +1493,13 @@
 
         Big Data frameworks, particularly Dask and Spark, appear well suited for
         the processing of Big neuroimaging Data. However, these frameworks still
-        require some work in order to be effectively used for neuroimaging data.
-        Furthermore, it is not yet clear if one is more performant than the
-        other for the processing of both large images and large datasets.
-        Additional comparative evaluations between Dask and Spark will need to
-        be performed.
+        require some work in order to be effectively used for neuroimaging applications.
+        We must first investigate what is the magnitude of the speedups that can be
+        obtained by applying these frameworks to neuroimaging.
+        % Furthermore, it is not yet clear if one is more per than the
+        % other for the processing of both large images and large datasets.
+        % Additional comparative evaluations between Dask and Spark will need to
+        % be performed.
 
 %	\todo{fix figure}
 %     \begin{sidewaysfigure}[!p] \centering

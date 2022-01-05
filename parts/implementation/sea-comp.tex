@@ -11,7 +11,7 @@ computing}\label{chapter:sea-comp}
 % Manuscript in preparation. \\
 
 Manuscript in Preparation:\\
-Val\'erie Hayot-Sasson and Tristan Glatard. Sea: A lightweight data-management library for Big Data scientific
+Val\'erie Hayot-Sasson, Mathieu Dugr\'e and Tristan Glatard. Sea: A lightweight data-management library for Big Data scientific
 computing. 2022 \\
 
 \section{Abstract}
@@ -68,7 +68,7 @@ data~\cite{mehta2017comparative}.
 %data in-memory to command-line applications, making it difficult to incorporate
 %these tools without additional overhead.
 
-Our goal is to provide data management strategies to scientific tools. We focus
+Our goal is to provide data-management strategies to scientific tools. We focus
 on well-established scientific applications that operate as command-line tools.
 These applications are written in a variety of different programming languages
 and communicate data between tasks via a POSIX-compliant shared file system.
@@ -93,18 +93,17 @@ scientific Big Data.
 % incompatible with the native resource managers (e.g. SLURM, PBS), and
 % therefore, and overlay cluster must be used.
 
-In this paper we introduce Sea, a user-space hierarchical file system for
+In this paper we introduce Sea, a user-space hierarchical data-management library for
 scientific workloads. The aim of Sea is to bring Big Data performance to
 scientific workloads through the incorporation of data locality and in-memory
 computing. Unlike Big Data frameworks, Sea can be utilized alongside existing
-workloads without the need to entirely reinstrument the existing workload.
+applications without the need to entirely reinstrument the existing application.
 Furthermore, as it executes entirely in userspace, it does not require elevated
 privileges to be installed and executed.
 
 This paper makes the following contributions:
 \begin{itemize}
-    \item Introduces a library, Sea, that generates an on-the-fly user-space
-    hierarchical file system
+    \item Introduces a data-management library, Sea, for applications running on HPC
     \item Develops a model to describe the performance bounds that can be
     obtained through the use of Sea
     \item Evaluates the tool using a synthetic Big Data workload on a real
@@ -141,16 +140,16 @@ This paper makes the following contributions:
       parallel file system (PFS) (e.g. Lustre~\cite{lustre}). These file systems
       are shared amongst all compute nodes within a cluster, typically connected
       to each node via high-performance network interconnect such as
-      InfiniBand~\cite{infiniband}. I/O overheads to shared PFS can be incurred
+      InfiniBand~\cite{infiniband}. I/O overheads of shared PFS can be incurred
       in many places, from the shared network, to the bandwidth of the storage
-      disks.  With Lustre specifically, there are many data nodes, known as
+      disks.  With Lustre specifically, there typically are many data nodes, known as
       Object Storage Servers (OSS) which contain several storage devices, known
       as Object Storage Targets (OST). All file metadata is maintained within a
       separate node known as the Metadata Server (MDS) and stored within a
       device referred to as the Metadata Target (MDT). Although data transfers
       can be communicated directly to the corresponding OST, the clients need to
       first communicate with the MDS to determine which OST to communicate with.
-      This can result in data transfer overheads, particularly when making
+      This can result in major data transfer overheads, particularly when making
       numerous requests to the metadata server.
       
       
@@ -158,7 +157,7 @@ This paper makes the following contributions:
       Burst Buffer, aimed at improving I/O performance. A Burst Buffer typically
       consists of fast storage (SSD and memory) and can be local to the compute
       node or as a dedicated I/O node. It was introduced as a response to offset
-      the impacts of large-scale application checkpointing on the PFS. The
+      the impacts of large-scale application checkpointing on the PFS~\cite{bb}. The
       application would write a checkpoint to the Burst Buffer and resume
       processing, while the checkpoint would be asynchronously flushed to the
       PFS. 
@@ -166,7 +165,7 @@ This paper makes the following contributions:
 
 \subsection{Big Data Frameworks and File systems}
 
-      Strategies to facilitate the processing of such large datasets is
+      Strategies mitigate the impacts of data transfers in data-intensive workloads is
       required. In text-based processing, frameworks such as
       MapReduce~\cite{dean2008mapreduce} and Apache
       Spark~\cite{zaharia2016apache} have implemented and popularized strategies
@@ -201,7 +200,7 @@ This paper makes the following contributions:
       a least recently used (LRU) policy. That means subsequent accesses to that
       data may be done entirely in memory so long as that data has not already
       been evicted. Similarly, for writes to a file system with writeback cache
-      enable, the file will be written to memory completing the write operation
+      enabled, the file will be written to memory completing the write operation
       once the file has been written entirely to memory. That file will then be
       flushed asynchronously to the appropriate storage device. As system memory
       may get overloaded with too many write requests, there is a limit to the
@@ -213,7 +212,7 @@ This paper makes the following contributions:
       Due to the architecture of conventional HPC clusters, network-based
       parallel files systems are favoured over Big Data distributed file
       systems. Such file systems require super-user access, preventing users
-      from deploying their own own on-the-fly cluster. While HDFS can be loaded
+      from deploying their own on-the-fly cluster. While HDFS can be loaded
       in user-space by mounting its File System in Userspace (FUSE)
       implementation, FUSE-based file systems can perform significantly worse
       than desired, depending on the application~\cite{tofuse}. Even with a
@@ -236,7 +235,7 @@ This paper makes the following contributions:
       result in greater overheads~\cite{quinson}.
 
       Characteristics that make XtreemFS unlikely to be deployed on-the-fly
-      include complex file sytem deployment and configuration properties. It
+      include complex file system deployment and configuration properties. It
       also does not provide a simple way to leverage different classes of
       storage devices, nor ensure that required data will be copied to the
       cluster's parallel file system.
@@ -264,13 +263,13 @@ This paper makes the following contributions:
     \includegraphics[width=\columnwidth]{figures/sea-comp/seacomp-diagram.pdf}%
 \caption{The Sea data-management library. Sea intercepts I/O-related glibc calls issued by the application and
 translates the path provided if located within the Sea mountpoint. Sea leverages a user-defined storage hierarchy to help select the most appropriate path and the redirects the call to glibc to process the request on the translated path. }
-\label{fig:seaneuro:diagram}
+\label{fig:sea-comp:diagram}
 \end{figure*}
 
 Sea\footnote{\url{https://github.com/valhayot/sea}} is an open-source user-space
 data-management C++ library for applications running on HPC systems. Its main
 aim is to reduce application data transfer costs by leveraging node-local
-storage. Sea redirects files accessed from a user-specified mount point to the
+storage (Figure~\ref{fig:sea-comp:diagram}). Sea redirects files accessed from a user-specified mount point to the
 appropriate storage devices using glibc interception. Within an intercepted call
 the file will be written to or read from the fastest storage device available. 
 
@@ -339,7 +338,7 @@ negligible.
 Naturally, the amount of data written may not fit entirely into a single local
 storage location. Currently, the user cannot specify the maximum amount of space
 to use in a given mountpoint explicitly. Sea queries all the available file
-system directly to determine the amount of available space. It relies on
+systems directly to determine the amount of available space. It relies on
 user-specified information on the maximum file size produced by the pipeline and
 the number of concurrent pipeline parallel threads to determine if there is
 sufficient space to write to the file system without issue. While it prevents
@@ -470,9 +469,16 @@ newer and older versions of glibc is undefined.
 
 
 \subsubsection{Flushing and eviction modes}
+\begin{figure*}
+
+    \centering
+    \includegraphics[scale=0.8]{figures/sea-comp/sea-flushevict.pdf}%
+\caption{The four Sea flush and eviction modes }
+\label{fig:sea-comp:fe}
+\end{figure*}
 %\todo{add diagrams here?}
 Flushing and eviction mechanisms give way to four different modes: flush-only,
-evict-only, flush-and-evict and do nothing. A flush-only is synonymous with a
+evict-only, flush-and-evict and keep. A flush-only is synonymous with a
 file copy in that a file that already exists within a Sea cache will be copied
 to persistent storage. This operation is particularly useful when a file will be
 reused by the application, and thus benefits from remaining in cache, but also
@@ -480,7 +486,7 @@ needs to be communicated between other nodes or needs to be persisted for
 post-processing analysis. To flush-only a file, the file must only be specified
 in the \texttt{.sea\_flushlist}.
 
-Evict-only is equivalent to a remove operation. These are files that are located
+Evict-only is equivalent to a remove operation. This mode is for files that are located
 within a Sea cache, but do not need to be persisted and will not be reused by
 the pipeline and therefore do not need to occupy cache space. Evict-only is
 useful for removing unnecessary application log files. To evict-only a file, the
@@ -490,12 +496,11 @@ Similar to the flush-only, the flush-and-evict mode copies data from cache to
 persistent storage. However, the assumption here is that these files will not be
 reused by the application and therefore need not occupy space in cache.
 Flush-and-evict is therefore synonymous with a move operation and is invoked on
-files that are specified in both the \texttt{.sea\_flushlist} and
-\texttt{.sea\_evictlist}.
+files that are specified in both the \texttt{.sea\_flushlist} and \texttt{.sea\_evictlist}.
 
 
-Do nothing is useful for when file needs to be in cache as it will be reused by
-the application, but is not needed in post-processing analysis or by other nodes
+Keep is useful for when file needs to be in cache as it will be reused by
+the application, but is not needed in post-processing analysis or by other nodes.
 
 %\subsubsection{Configuration File} \subsubsection{Program execution}
 %\subsubsection{Limitations} behaviour unspecified in mixed static/dynamic
@@ -596,7 +601,7 @@ the application, but is not needed in post-processing analysis or by other nodes
       can be broken down into two components: The amount of time it takes read
       the data and the amount of time it takes to write the data. With more
       heterogeneous applications (some components are compute intensive whereas
-      others are data intensive), a third component, comprising of compute time,
+      others are data intensive), a third component, consisting of compute time,
       can be added. Furthermore, latency may also play a significant role
       application makespan, particularly in scenarios with large amounts of
       small files. We choose to ignore latency costs in our model and make the
@@ -611,6 +616,7 @@ the application, but is not needed in post-processing analysis or by other nodes
           M_{l} =  \frac{D_{r}}{L_{r}} + \frac{D_{w}}{L_{w}}
       \end{equation}
 
+      {\noindent}
       Where, \\
       $M_{l}$ is the application makespan using Lustre \\
       $D_{r}$ is the amount of data read \\
@@ -653,9 +659,8 @@ the application, but is not needed in post-processing analysis or by other nodes
         L_{w} = \min{(cN, sN, d_{w}\min{(d, cp)})}
     \end{equation}
 
+    {\noindent}
     Where, \\
-    $L_{r}$ is Lustre's read bandwidth \\
-    $L_{w}$ is Lustre's write bandwidth \\
     $N$ is the network bandwidth \\
     $c$ is the number of compute nodes used \\
     $s$ is the number of Lustre storage nodes \\
@@ -689,7 +694,7 @@ the application, but is not needed in post-processing analysis or by other nodes
 
       %\spacing{1.5}
       For the sake of simplicity, the above models assume that the network
-      bandwidth between the compute nodes and data nodes is the same. This,
+      bandwidth between the compute and data nodes is the same. This,
       however, may not necessarily be the case. Furthermore, the model also
       assumes that each file can only be located on a single disk, meaning that
       the parallel bandwidth can at maximum be as fast as all Lustre disks
@@ -710,6 +715,7 @@ the application, but is not needed in post-processing analysis or by other nodes
           M_{c} = \frac{D_{cr}}{cC_{r}} + \frac{D_{cw}}{cC_{w}}
       \end{equation}
 
+      {\noindent}
       Where, \\
       $M_{c}$ is the makespan of application I/O to page cache \\
     %   $c$ is the number of compute nodes \\
@@ -759,6 +765,7 @@ the application, but is not needed in post-processing analysis or by other nodes
           M_{lc} = \frac{D_{I}}{L_{r}} + M_{c}
       \end{equation}
 
+      {\noindent}
       Where, \\
       $M_{lc}$ is the application makespan using Lustre with page cache \\
       $D_{I}$ is the amount of input data \\
@@ -841,7 +848,7 @@ the application, but is not needed in post-processing analysis or by other nodes
 
       In an optimal scenario all intermediate data and final output data would
       fit in tmpfs. This would provide an application using Sea in-memory
-      performance. However, due to limited tmpfs storage space, , it is unlikely
+      performance. However, due to limited tmpfs storage space, it is unlikely
       to be the case. In addition, Sea may further restrict available storage
       space to prevent exceeding tmpfs storage by ensuring that there is at
       least sufficient space for all processes to each write a file
@@ -952,8 +959,9 @@ the application, but is not needed in post-processing analysis or by other nodes
       dataset of the human brain, as a representative scientific dataset. For
       all our experiments, we utilize the \SI{20}{\micro\meter} dataset, which
       totals to approximately \SI{603}{\gibi\byte}. The dataset was broken down
-      into 1000 files each consisting of \SI{617}{\mebi\byte} of data as well as
-      5000 blocks each \SI{124}{\mebi\byte} in size.
+      into 1000 files each consisting of \SI{617}{\mebi\byte} of data.
+      %of data as well as
+      %5000 blocks each \SI{124}{\mebi\byte} in size.
       
                                                                                    
       We evaluated Sea using 4 different experimental conditions: 1) varying the
@@ -968,7 +976,7 @@ the application, but is not needed in post-processing analysis or by other nodes
       blocks. Sea in-memory (flushing and eviction of only the last iteration of
       files) strategy was used for all conditions.
       
-      We also evaluted Sea flush-all (flush all files to Lustre) using 5 nodes,
+      We also evaluated Sea flush-all (flush all files to Lustre) using 5 nodes,
       64 processes, 6 disks and 5 iterations using the same incrementation
       application.
 
@@ -1077,7 +1085,7 @@ the application, but is not needed in post-processing analysis or by other nodes
         iterations}\label{fig:sea-comp:processes}
     \end{subfigure}
     \caption{Benchmarks comparing Lustre and Sea In-memory performance under
-    various conditions using the Incrementation application on the Big Brain
+    various conditions using the incrementation application on the Big Brain
     image. All experiments were repeated 5$\times$. Model bounds represented by coloured regions}
     \label{fig:sea-comp:benchmarks}
     \end{figure*}
@@ -1131,7 +1139,7 @@ the application, but is not needed in post-processing analysis or by other nodes
       single process writing to it.
 
       When Sea does not provide speedups, it either performs similarly to
-      Lustre, as can be seen in Figure~\ref{fig:sea-comp:nodes} at one node and
+      Lustre, as can be seen in Figure~\ref{fig:sea-comp:nodes} at one node and in
       Figure~\ref{fig:sea-comp:iterations} at 1 iteration, or sightly slows down
       execution, as can be seen in~\ref{fig:sea-comp:disks}. As expected, Sea at
       a single iteration can at best perform similarly or slightly worse than
@@ -1158,11 +1166,11 @@ the application, but is not needed in post-processing analysis or by other nodes
 
       \subsection{Model accurately predicts performance trends}
 
-      Figure~\ref{fig:sea-comp:benchmarks} shows us that our model incorrectly
-      predicts the bounds for two experiments: Experiment 3
+      Figure~\ref{fig:sea-comp:benchmarks} shows us that our model correctly describes The
+      bounds for all but two experiments: Experiment 3
       (Figure~\ref{fig:sea-comp:iterations}) and Experiment 4
       (Figure~\ref{fig:sea-comp:processes}). In Experiment 3, the model
-      incorrectly predicts the bounds for 1 iteration. Since in this case, all
+      incorrectly represents the bounds for 1 iteration. Since, in this case, all
       the data should be able to fit in page cache for both Sea and Lustre, it
       is possible that memory bandwidth has been overestimated, resulting in
       incorrect model predictions.
@@ -1186,7 +1194,7 @@ the application, but is not needed in post-processing analysis or by other nodes
     \label{fig:sea-comp:flush}
     \end{figure*}
 
-      \subsection{Significant overheads with Flush-all mode on data-intensive workload}
+      \subsection{Significant overheads with Flush-all mode}
 
       Figure~\ref{fig:sea-comp:flush} demonstrates the overhead that can be
       obtained by using flush-all when there is no compute to mask the flushing.
@@ -1234,7 +1242,7 @@ the application, but is not needed in post-processing analysis or by other nodes
     performance is significantly impacted by the presence of a single flush and
     evict process.  
 
-    Sea alone has limited portability. It cannot be used with operating systems
+    Sea cannot be used with operating systems
     that are not Linux-based, and therefore, the use of Sea limits application
     portability. However, HPC systems commonly use Linux operating systems,
     thus, it is not limiting for its intended use case. Furthermore, we provide
@@ -1334,7 +1342,7 @@ the application, but is not needed in post-processing analysis or by other nodes
 
     We created Sea, a lightweight open-source data-management library for
     scientific applications. With the help of glibc interception, we were able
-    to create a library that maintains qualities import to scientific computing
+    to create a library that maintains qualities important to scientific computing
     (i.e. ease-of-use, reproducibility, portability and parallelism). Our
     results demonstrate that Sea is quite beneficial to reducing the data
     transfers overheads, particularly when using an in-memory computing
@@ -1351,7 +1359,7 @@ the application, but is not needed in post-processing analysis or by other nodes
 
     More complex functioning of Sea, such as splitting of individual files, as
     seen with the other burst buffer file systems, may be preferential,
-    particularly in maximizing cache usage. However, the more we complexify
+    particularly in maximizing cache usage. However, the more we complicate
     these libraries, the harder they are for users to use. As a result, users
     must wait until the cluster guidelines are developed detailing how a user
     should use these libraries. The boundary between ease-of-use and performance

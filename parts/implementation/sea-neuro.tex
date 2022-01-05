@@ -23,8 +23,8 @@ data-management with Sea. 2022 \\
   To facilitate data management for standardized neuroimaging tools, we
   developed Sea, a library that intercepts and redirects application read and
   write calls to minimize data transfer time. In this paper, we investigate the
-  performance of Sea on three standard fMRI preprocessing pipelines, FSL Feat,
-  SPM and AFNI, using three neuroimaging datasets of different sizes
+  performance of Sea on three preprocessing pipelines implemented using standard toolboxes (FSL,
+  SPM and AFNI), using three neuroimaging datasets of different sizes
   (OpenNeuro's ds001545, PREVENT-AD and the HCP dataset) on two high-performance
   computing clusters. Our results demonstrate that given the features of the
   applications and datasets, Sea provides large speedups (up to 32$\times$) when
@@ -51,7 +51,7 @@ data-management with Sea. 2022 \\
     memory and local storage as a cache. While these frameworks have been used
     to process neuroimaging data~\cite{rokem2021pan,thunder,boubela2016big},
     their popularity within the domain remains low due to the effort required to
-    rewrite standardize neuroimaging toolboxes (e.g. FSL, AFNI, SPM) for the
+    rewrite standardized neuroimaging toolboxes for the
     frameworks. 
     % Although it is possible to use the tools within the Big Data frameworks,
     % optimizations like in-memory computing would not be leveraged due to the
@@ -64,7 +64,7 @@ data-management with Sea. 2022 \\
     parallelization of tasks.
     %This is because even with large datasets, neuroimaging data processing
     %remains split between compute and data intensive components.
-    Although these workflow engines do not prohibit the use of data management
+    Although these workflow engines do not prohibit the use of data-management
     strategies, it is not directly integrated into the workflow. To give
     neuroimaging applications data management capabilities, the applications
     must interact with a file system that can do so.
@@ -115,7 +115,7 @@ data-management with Sea. 2022 \\
     with data-intensive applications can effectively deteriorate the performance
     of the shared file system for all users on the cluster. Solutions for
     improving shared file system performance include
-    throttling~\cite{huang2020ooops} the data intensive workloads or
+    throttling~\cite{huang2020ooops} the data-intensive workloads or
     recommending the use of Burst Buffers~\cite{bb} (e.g. reserving a compute
     node for storage or leveraging local compute storage during processing). The
     latter, however, requires that the user manages their data to and from the
@@ -132,7 +132,7 @@ data-management with Sea. 2022 \\
     file systems~\cite{xtreemfs,burstfs,gekkofs}. 
     
     In this paper, we evaluate Sea (Chapter~\ref{chapter:sea-comp}), a data-management library for HPC, on three neuroimaging preprocessing pipelines
-    executed on three different datasets. We structure our analysis of Sea for the data management of
+    executed on three different datasets. We structure our analysis of Sea for the data-management of
     neuroimaging pipelines by first investigating whether Sea can effectively intercept the calls of these neuroimaging pipelines.
     We then investigate the presence of speedup by using Sea alongside neuroimaging pipelines and try to understand the conditions
     which result in greater speedups.
@@ -358,7 +358,7 @@ data-management with Sea. 2022 \\
       \hline
     \end{tabular}}
     \footnotesize{$*$ Measurements taken on the dedicated cluster}
-    \caption{Pipeline execution characteristics}\label{table:seaneuro:pipelines}
+    \caption{Pipeline execution characteristics based on the processing of a single fMRI image using a single application process}\label{table:seaneuro:pipelines}
     \end{table*}
 
     \subsection{Controls}
@@ -369,7 +369,7 @@ data-management with Sea. 2022 \\
     executed properly.
    
     To validate that the outputs produced were sufficiently correct, we
-    performed visual quality control of the pre-processed images to ensure that
+    performed visual quality control of the preprocessed images to ensure that
     they were correctly skull-stripped and registered to the template brain (MNI
     template). We repeated this step for all datasets and all pipelines
     processing a single image. In addition, we compared output number of files
@@ -383,14 +383,14 @@ data-management with Sea. 2022 \\
     Our experiments were executed on two different clusters: 1) a dedicated cluster
     and 2) and a production cluster. We chose this experimental setup as the dedicated
     cluster allowed us to understand Sea's performance without activity of other users.
-    The production cluster would give us insight into what performance typical users might
+    The production cluster gave us insight into what performance typical users might
     be able to expect on a shared cluster.
 
     The dedicated cluster was composed of 8
     compute nodes with \SI{256}{\gibi\byte} memory and \SI{125}{\gibi\byte}
     tmpfs, running Centos 8.1.1911.
     Storage on the dedicated cluster consisted of 4 Lustre ZFS storage nodes with 44
-    HDD object storage targets (OSTs) and 1 metadata server  (MDS) with a single
+    HDD object storage targets (OSTs) and 1 metadata server (MDS) with a single
     metadata target (MDT). The storage nodes were connected to the compute nodes
     via a 20Gbps ethernet connection. The cluster's hardware was similar to that
     of Beluga.
@@ -405,18 +405,17 @@ data-management with Sea. 2022 \\
     \SI{69.8}{\tebi\byte} each and two MDTs of \SI{3.3}{\tebi\byte}.
 
     On the dedicated cluster, we ran the experiments with and without
-    Lustre deterioration, which we refer to as busy writers. Without busy
+    Lustre degradation, which was induced by ``busy writers''. Without busy
     writers, the fMRI preprocessing pipelines have exclusive access to the
     cluster. With busy writers, the fMRI preprocessing pipelines are executed
-    alongside a Spark application that reads and writes approximately
-    1000$\times$ 617~MB blocks using 64 threads multiple times (until the fMRI
-    preprocessing applications completes), with a 5 seconds sleep between reads
+    alongside a Spark application that continuously reads and writes approximately
+    1000$\times$ \SI{617}{\mebi\byte} blocks using 64 threads, with a 5 seconds sleep between reads
     and writes. In our experiments, we either had 6 nodes each executing the
     Spark application or no busy writers.
 
     Our experiments generally did not use prefetching, flushing or eviction. The
     only pipeline configured to prefetch was SPM, as the input data is otherwise
-    read through a memmap (i.e. only loading necessary portions of the file to memory) with Lustre. Flushing would be necessary with
+    read through a memmap (i.e. only loading necessary portions of the file to memory) with Lustre. Flushing would normally be necessary with
     preprocessing as the user would always require the output data. To
     investigate the impacts of flushing on these pipelines, we performed a
     separate set of experiments where AFNI and SPM would flush all data
