@@ -9,37 +9,33 @@
   frameworks more suitable for the processing of the increasingly prominent
   scientific Big Data.
 
-The objectives of this thesis are two-fold: 1) determine whether neuroimaging
-frameworks benefit from incorporation of Big Data management strategies and
-investigate how to adapt existing solutions, and 2) develop new tools to enable
-data management within neuroimaging workflows. Our performance analysis
-determined that neuroimaging frameworks can benefit significantly from the
-incorporation of data management strategies, by up to a factor of 5.3$\times$ in the
-most data-intensive case. While we found Big Data frameworks (i.e. Apache Spark)
-to significantly speedup data-intensive neuroimaging workflows, our analysis on
-overlay pilot-scheduling with Spark determined that large-scale Spark workflows
-would be difficult to run on HPC. Furthermore, while alternative hardware
-solutions, such as Intel Optane DCPMM produce speedups similar to
-in-memory processing with Spark and could be used as an alternative, it remains
-inaccessible to many researchers.
+  The objectives of this thesis are two-fold: 1) determine whether neuroimaging
+  frameworks benefit from incorporation of Big Data management strategies and
+  investigate how to adapt existing solutions, and 2) develop new tools to enable
+  data management within neuroimaging workflows. Our performance analysis
+  determined that neuroimaging frameworks can benefit significantly from the
+  incorporation of data management strategies, by up to a factor of 5.3$\times$ in the
+  most data-intensive case. While we found Big Data frameworks (e.g. Apache Spark)
+  to significantly speedup data-intensive neuroimaging workflows, our analysis on
+  overlay pilot-scheduling with Spark determined that large-scale Spark workflows
+  would be difficult to run on HPC. Furthermore, while alternative hardware
+  solutions, such as Intel Optane DCPMM produce speedups similar to
+  in-memory processing with Spark and could be used as an alternative, it remains
+  inaccessible to many researchers.
 
-To bring data-management solutions to neuroimaging applications, we developed
-two libraries, namely, Rolling Prefetch and Sea. Rolling Prefetch is our
-data-management solution for cloud-based applications that enables the
-sequential prefetching of data located on Amazon S3 storage. Experimental
-results demonstrate that Rolling Prefetch can speed up experiments by a factor of
-1.8$\times$ and has a theoretical bound of 2$\times$.
+  To bring data-management solutions to neuroimaging applications, we developed
+  two libraries, namely, Rolling Prefetch and Sea. Rolling Prefetch is our
+  data-management solution for cloud-based applications that enables the
+  sequential prefetching of data located on Amazon S3 storage. Experimental
+  results demonstrate that Rolling Prefetch can speed up experiments by a factor of
+  1.8$\times$ and has a theoretical bound of 2$\times$.
 
-Sea targets the standard neuroimaging workflows executed on HPC. It
-brings prefetching, data-locality and in-memory computing to POSIX-based
-command-line tools through the interception of glibc calls. Using this approach
-researchers can benefit from data-management related speedups by incorporating
-Sea into their standard analysis. Our results on standard neuroimaging pipelines
-show that Sea can speed up execution by an average of 11$\times$ with large datasets
-writing to a deteriorated shared file system.
-
-
-
-
+  Sea targets the standard neuroimaging workflows executed on HPC. It
+  brings prefetching, data-locality and in-memory computing to POSIX-based
+  command-line tools through the interception of glibc calls. Using this approach
+  researchers can benefit from data-management related speedups by incorporating
+  Sea into their standard analysis. Our results on standard neuroimaging pipelines
+  show that Sea can speed up execution by an average of 11$\times$ with large datasets
+  writing to a deteriorated shared file system.
   
 \end{abstract}

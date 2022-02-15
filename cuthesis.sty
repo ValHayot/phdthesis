@@ -65,8 +65,11 @@
 \def\principaladviser#1{\gdef\@principaladviser{#1}}
 \def\advis@r{Adviser}
 \def\principaladvisor#1{\gdef\@principaladviser{#1}\gdef\advis@r{Advisor}}
-\def\firstreader#1{\gdef\@firstreader{#1}}
-\def\secondreader#1{\gdef\@secondreader{#1}}
+\def\firstexaminer#1{\gdef\@firstexaminer{#1}}
+\def\secondexaminer#1{\gdef\@secondexaminer{#1}}
+\def\thirdexaminer#1{\gdef\@thirdexaminer{#1}}
+\def\external#1{\gdef\@external{#1}}
+\def\chair#1{\gdef\@chair{#1}}
 \def\submitdate#1{\gdef\@submitdate{#1}}
 \def\copyrightyear#1{\gdef\@copyrightyear{#1}} % \author, \title in report
 %
@@ -171,14 +174,20 @@ of Doctor of Philosophy.
     \ \\
     Signed by the final examining commitee:\\
     \ \\
-    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Chair} \\
+    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Chair}\\[-7pt]
+    \hspace*{1cm}\parbox[t]{4in}{\@chair} \\[6pt]
     \ifphd%
-    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ External Examiner} \\
+    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ External Examiner} \\[-7pt]
+    \hspace*{1cm} \parbox[t]{4in}\@external \\[6pt]
     \fi%
-    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Examiner} \\
-    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Examiner} \\
-    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Examiner} \\
-    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Supervisor}\\
+    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Examiner} \\[-7pt]
+    \hspace*{1cm} \parbox[t]{4in}\@thirdexaminer \\[6pt]
+    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Examiner} \\[-7pt]
+    \hspace*{1cm} \parbox[t]{4in}\@secondexaminer \\[6pt]
+    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Examiner} \\[-7pt]
+    \hspace*{1cm} \parbox[t]{4in}\@firstexaminer \\[6pt]
+    \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Supervisor}\\[-7pt]
+    \hspace*{1cm} \parbox[t]{4in}\@principaladviser \\[6pt]
     \ifcosupervisor%
     \hspace*{1cm} \hrulefill \makebox[3cm][l]{ Co-supervisor}\\
     \fi%
@@ -221,7 +230,7 @@ of Doctor of Philosophy.
 
 \def\phdabstract{%
         \newpage
-        \null\vskip.25in%
+        \null\vspace{-0.55in}%
         \begin{center}
                 {\LARGE\bf{Abstract}}
         \end{center}
@@ -258,6 +267,9 @@ of Doctor of Philosophy.
                 \let\addvspace=\saveaddvspace}
                 \newpage
         \fi
+        \addcontentsline{toc}{chapter}{Glossary}
+        {\printglossary}
+        \newpage
         \pagenumbering{arabic}
 %       \pagestyle{headings}}     % no longer acceptable
 }

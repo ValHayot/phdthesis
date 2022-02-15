@@ -6,15 +6,14 @@
         lab workstations. With the advancement of data sharing technologies, 
         this data has been made widely available, however, accessibility to 
         such data remains limited due to infrastructural demands and high processing time.
-        Even with powerful infrastructure, such as High
-        Performance Computing (HPC), software configured to 
+        Even with powerful infrastructure, such as \gls{hpc} infrastructure, software configured to 
         efficiently use resources is required to make execution time manageable. 
         Ensuring efficient data processing is 
         complex and limits accessibility to researchers with little programming 
         knowledge. As a result, frameworks for the efficient 
         processing of Big neuroimaging Data need to be developed.
         
-        Many neuroimaging workflow engines currently exist. Examples include
+        Many neuroimaging \gls{workflow} engines currently exist. Examples include
         Nipype~\cite{nipype}, Pipeline System for Octave and Matlab 
         (PSOM)~\cite{10.3389/fninf.2012.00007}, LONI~\cite{REX20031033}, 
         SPM~\cite{spm}, FastR~\cite{10.3389/fict.2016.00015},
@@ -31,7 +30,7 @@
         Big Data frameworks differ from those available in neuroimaging as their
         focus is mainly on workflow composition and performance, primarily
         through the minimization of data transfers. They were originally conceived
-        to be used on commodity infrastructure, where the network can be a significant bottleneck,
+        to be used on \gls{commodity}, where the network can be a significant bottleneck,
         particularly when transferring large amounts of data. Big Data frameworks such as
         Apache Spark~\cite{Zaharia:2016:ASU:3013530.2934664} and
         Dask~\cite{rocklin2015dask} both aim to be easy-to-use, applicable to a
@@ -39,8 +38,8 @@
         Big Data.
 
         The two main data-management strategies employed by Big Data frameworks
-        are: data locality and in-memory computing. Data locality ensures that
-        the compute is moved to where the data is located, as it is less cumbersome to
+        are: \gls{locality} and \gls{inmem}. Data locality ensures that
+        the computation is moved to where the data is located, as it is less cumbersome to
         transfer code over a network than large datasets. In-memory computing attempts
         to maintain all intermediate data in memory, due to memory's increased performance over
         other available storage devices.
@@ -59,9 +58,9 @@
         workflows. Despite integration with Big Data frameworks, it is not
         possible to create Big Data workflows using their API exclusively.
 
-        A big limitation to adapting Big Data frameworks for neuroimaging 
+        A major limitation to adapting Big Data frameworks for neuroimaging 
         workflows is that these frameworks are tightly-coupled with the 
-        infrastructure they were designed for -- commodity clusters. While
+        infrastructure they were designed for. While
         it is possible for some research labs to be using either a local cluster
         or the cloud for their processing, many may only have access to HPC
         clusters. As a result of this, most available scientific workflow 
@@ -87,8 +86,7 @@
         neuroimaging applications. Chapter~\ref{chp:spa} investigates how to
         best schedule Apache Spark applications on HPC infrastructure.
         Chapter~\ref{chp:optane} then looks at how improved hardware can also
-        bring similar speedups, by investigating the use of Intel Optane DC
-        Persistent Memory on data-intensive neuroimaging pipelines.
+        bring similar speedups, by investigating the use of \gls{optane} on data-intensive neuroimaging pipelines.
 
         Part~\ref{part:implementation} focuses on tools designed to bring
         data management strategies to neuroimaging applications. Chapter~\ref{chp:rp}
