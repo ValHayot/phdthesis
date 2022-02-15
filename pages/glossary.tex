@@ -1,0 +1,56 @@
+\newglossaryentry{inmem}
+{
+	name={in-memory computing},
+	description={Communicating data between tasks via memory}
+}
+\newglossaryentry{locality}
+{
+	name={data locality},
+	description={Computing where the data is located to reduce data transfers}
+}
+\newglossaryentry{workflow}{
+	name={workflow},
+	description={A graph of tasks. Typically arranged as a DAG}
+}
+\newglossaryentry{pipeline}{
+	name={pipeline},
+	description={See: workflow}
+}
+\newglossaryentry{optane}{
+	name={Intel Optane DC Persistent Memory Module},
+	description={A high-performance/high capacity persistent storage device that resides on the memory bus}
+}
+\newglossaryentry{batch}{
+	name={batch scheduling},
+	description={Allocation of all necessary resources within a single resource request}
+}
+\newglossaryentry{pilot}
+{
+    name={pilot jobs},
+    description={A scheduling strategy commonly used in HPC systems that leverages dynamic resource pools}
+}
+\newglossaryentry{commodity}{
+	name={commodity infrastructure},
+	description={Infrastructure typically made up of low-cost high-availability components (e.g. workstation). Network transfers of large datasets can be a significant bottleneck}
+}
+
+\newglossaryentry{hpc}
+{
+    name={HPC},
+    description={High Performance Computing (HPC) clusters are shared distributed computing infrastructures that typically consists of high-performance network interconnect, shared parallel file systems and reservable compute resources},
+    first=\glsentrylong{hpc} (\glsentryname{hpc}),
+    long={High Performance Computing}
+}
+
+\newglossaryentry{prefetch}
+{
+	name={prefetch},
+	description={Loading the data to cache in anticipation of a task access}
+}
+
+\newglossaryentry{tmpfs}{name={tmpfs},description={A volatile file system residing in memory cache space}}
+
+\newglossaryentry{ldpreload}{name={LD\_PRELOAD trick},description={Allows shared object libraries to be loaded prior to the intended library call, thereby enabling interception of library calls}}
+
+\newglossaryentry{pc}{name={page cache},description={Portion of memory occupied by file I/O data}}
+\makeglossaries
