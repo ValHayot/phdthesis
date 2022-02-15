@@ -43,7 +43,7 @@ Cloud and Grid Computing (CCGRID)}. \url{10.1109/CCGRID.2019.00059}
     will not speed up current functional MRI analyses unless coupled with data
     locality and processing around 280 subjects concurrently. Furthermore, we
     observe that emulating in-memory computing using in-memory file systems
-    (tmpfs) does not reach the performance of an in-memory engine, presumably
+    (\gls{tmpfs}) does not reach the performance of an in-memory engine, presumably
     due to swapping to disk and the lack of data cleanup. We conclude that Big
     Data processing strategies are worth developing for neuroimaging
     applications. 
@@ -337,7 +337,7 @@ mechanism provided by the Linux kernel, described in
 details in~\cite{love2010linux}. To summarize, data read from disk remains
 cached in memory until evicted by an LRU (Least Recently Used) strategy. When a
 process invokes the \texttt{read()} system call, the kernel will return the data
-directly from memory if the requested data lies in the page cache, realizing a
+directly from memory if the requested data lies in the \gls{pc}, realizing a
 cache \emph{hit}. Cache hits drastically speed-up data reads, by masking the
 disk latency and bandwidth behind a memory buffer. In effect, page caching
 provides in-memory computing transparently to the processing engine. However,
