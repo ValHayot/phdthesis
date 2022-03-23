@@ -1,7 +1,14 @@
 
     
     \chapter{Background}~\label{chp:background} 
-    \section{Current state of neuroimaging applications}
+    The rise of Big Data has transformed the way in which data is processed. This chapter aims to discuss the main differences between current neuroimaging/scientific and Big Data frameworks. In Section~\ref{status}, we will briefly introduce the two types of datasets that are
+    giving rise to the neuroimaging big data, the available data-sharing and
+    processing platforms and the differences between
+    commodity and HPC infrastructure.
+    As we wish to compare scientific workflow engines with Big Data frameworks for the
+    processing of neuroimaging big data, we will break down our analyses by the four principal features necessary
+    for scientific data processing: 1) workflow composition (Section~\ref{workcomp}), 2) performance (Section~\ref{performance}), 3) portability (Section~\ref{portability}) and 4) reproducibility (Section~\ref{reproducibility}).
+    \section{Current state of neuroimaging applications}\label{status}
         
 
         \subsection{Big Neuroimaging Datasets}\label{datasets}
@@ -335,7 +342,7 @@
             several scientific workflows are composed in Unix-based
             environments. These environments typically have Make installed by
             default eliminating the need for users to install it manually. Such
-            features results in the workflow engine Make being desirable for scientific
+            features result in the workflow engine Make being desirable for scientific
             computing. As Make is exclusive to Linux environments, it is not
             platform-independent. However, Make has the flexibility of being
             easily extensible and can interface directly with any command-line
@@ -645,7 +652,7 @@
         were intended to be used on. Scientific workflow engines try to remain
         efficient in their handling of compute resources since such resources
         were previously scarce. In contrast, Big Data frameworks make efficient
-        use of commodity clusters, where data transfers over networks can be curbersome.
+        use of commodity clusters, where data transfers over networks can be cumbersome.
 
         As some researchers are trying to shift towards the use of commodity
         infrastructure while others are trying to process Big Data on HPC, the
@@ -861,19 +868,18 @@
             The reason MapReduce and Spark do not leverage HPC resource managers
             is that HPC resources managers are unaware of the locality of the
             data and cannot perform any form of lazy evaluation. In addition to
-            YARN and Mesos, Spark provides its own standalone scheduler. The
-            standalone scheduler is simple providing only a basic scheduler. It
-            allows users to use Spark out-of-the-box. Similarly to scientific
+            YARN and Mesos, Spark provides its own default (standalone) scheduler.
+    Similarly to scientific
             workflows, all three Big Data frameworks provide their own
             schedulers for single-node scheduling.
 
             Spark's standalone scheduler is a simple scheduler packaged with
             Spark that can be used in distributed workflows. It can be used for
             single-node and cluster deployments. For cluster deployments, Spark
-            has two execution modes: client and cluster. For client execution,
+            has two execution modes: client and cluster. In client execution mode,
             the application driver is intended to be executed on the client
-            node. In cluster mode, the driver is intended to be running
-            on a compute node. Cluster mode can ensure fault-tolerance of not
+            node. In contrast, the driver is intended to be running
+            on a compute node, in cluster mode. Cluster mode can ensure fault-tolerance of not
             only the workers and master, but also the driver. However, cluster
             mode is not available to PySpark deployments using the standalone
             scheduler.
@@ -1376,8 +1382,31 @@
     
     
     \section{Discussion}
+
+
+\begin{table*}
+\centering
+\resizebox{\columnwidth}{!}{%
+\newcolumntype{b}{>{\columncolor{orange!20}} c }
+\newcolumntype{s}{>{\columncolor{red!20}} c}
+\begin{tabular}{|c|b|s|}
+    \cline{2-3}
+    \multicolumn{1}{c|}{} & \textbf{Big Data Frameworks} & \textbf{Scientific workflow engines} \\
+\hline
+\textbf{Data representation} & Distributed data structures & Files and primitive types \\
+\hline
+\textbf{Fault-tolerance} & Lineage & Checkpoint/Restart \\
+\hline
+\textbf{Tool interface} & None & Programming/Domain-specific languages \\
+\hline 
+\textbf{Provenance} & Lineage & W3C-Prov/NIDM-results/Custom \\
+\hline 
+\end{tabular}
+} \caption{Differences between Big Data frameworks and scientific workflow engines according to neuroimaging workflow criteria}
+\label{tb:summary}
+\end{table*}
     
-        While many neuroimaging workflow engines exist, none of them are well
+        Although numerous neuroimaging workflow engines exist, none of them are well
         suited for the processing of neuroimaging Big Data due to lack of
         data-centric optimizations. Even more general scientific workflows are
         not equipped for the handling of these datasets. Existing
@@ -1400,7 +1429,7 @@
         of scientific data. 
 
         Effective neuroimaging workflows need to meet certain criteria:
-        ease-of-use, performance, portability and reproducibility. In order 
+        ease-of-use, performance, portability and reproducibility. Table~\ref{tb:summary} demonstrates the differences in how Big Data frameworks and scientific workflow engines meet this criteria. In order 
         for a workflow language to be easy to
         use, it is recommended that it is based on simple programming languages
         commonly used in the field, such as Python or MATLAB (GNU/Octave). Using

@@ -224,7 +224,7 @@ This paper makes the following contributions:
       There are, however, Big Data file systems, such as
       XtreemFS~\cite{xtreemfs} that exist entirely within user space, are
       POSIX-compliant, and can use alternative methods to FUSE to function.
-      XtreemFS uses the LD\_PRELOAD trick to intercept file system calls made to
+      XtreemFS uses the \gls{ldpreload} to intercept file system calls made to
       the GNU C library (glibc). There are limitations to using glibc
       interception. For instance, the application must be dynamically linked and
       make glibc calls. However, statically-linked applications are uncommon and
